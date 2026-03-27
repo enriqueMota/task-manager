@@ -6,11 +6,14 @@ export const TaskStatusSchema = z.enum(TASK_STATUS_VALUES);
 export const TaskPrioritySchema = z.enum(TASK_PRIORITY_VALUES);
 
 export const CreateTaskSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be at most 100 characters'),
+  title: z
+    .string()
+    .min(3, 'Title must be at least 3 characters')
+    .max(100, 'Title must be at most 100 characters'),
   description: z.string().max(500, 'Description must be at most 500 characters').optional(),
   status: TaskStatusSchema,
   priority: TaskPrioritySchema,
-  dueDate: z.string().datetime({ message: 'dueDate must be a valid ISO date string' }).optional(),
+  dueDate: z.iso.datetime({ message: 'dueDate must be a valid ISO date string' }).optional(),
   assignee: z.string().optional(),
 });
 
