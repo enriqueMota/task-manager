@@ -15,6 +15,7 @@ export interface TaskResponseDto {
 }
 
 export interface TaskStatsResponseDto {
+  total: number;
   byStatus: Record<string, number>;
   byPriority: Record<string, number>;
 }
@@ -35,6 +36,7 @@ export function toTaskResponseDto(entity: TaskEntity): TaskResponseDto {
 
 export function toTaskStatsResponseDto(stats: TaskStats): TaskStatsResponseDto {
   return {
+    total: stats.total,
     byStatus: stats.byStatus,
     byPriority: stats.byPriority,
   };

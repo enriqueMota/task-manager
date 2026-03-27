@@ -25,6 +25,7 @@ describe('GetTaskStatsUseCase', () => {
 
   it('returns stats from the repository', async () => {
     const stats: TaskStats = {
+      total: 6,
       byStatus: { pending: 3, completed: 1, 'in-progress': 2 },
       byPriority: { low: 1, medium: 3, high: 2 },
     };
@@ -37,7 +38,7 @@ describe('GetTaskStatsUseCase', () => {
   });
 
   it('delegates entirely to repository — no in-memory computation', async () => {
-    const stats: TaskStats = { byStatus: {}, byPriority: {} };
+    const stats: TaskStats = { total: 0, byStatus: {}, byPriority: {} };
     vi.mocked(repo.getStats).mockResolvedValue(stats);
 
     await useCase.execute();

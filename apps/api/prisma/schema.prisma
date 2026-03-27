@@ -23,7 +23,12 @@ model Task {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // Single-column indexes for individual filter lookups
   @@index([status])
   @@index([priority])
   @@index([assignee])
+  // Compound indexes for the most common filter+sort query patterns
+  @@index([status, createdAt(sort: Desc)])
+  @@index([priority, createdAt(sort: Desc)])
+  @@index([status, priority])
 }

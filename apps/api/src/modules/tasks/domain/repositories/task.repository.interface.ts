@@ -13,6 +13,7 @@ export interface TaskSort {
 }
 
 export interface TaskStats {
+  total: number;
   byStatus: Record<string, number>;
   byPriority: Record<string, number>;
 }

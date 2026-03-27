@@ -55,7 +55,8 @@ export class PrismaTaskRepository implements TaskRepository {
   }
 
   async getStats(): Promise<TaskStats> {
-    const [byStatusRows, byPriorityRows] = await Promise.all([
+    const [total, byStatusRows, byPriorityRows] = await Promise.all([
+      this.prisma.task.count(),
       this.prisma.task.groupBy({
         by: ['status'],
         _count: { _all: true },
@@ -76,6 +77,6 @@ export class PrismaTaskRepository implements TaskRepository {
       byPriority[row.priority] = row._count._all;
     }
 
-    return { byStatus, byPriority };
+    return { total, byStatus, byPriority };
   }
 }
