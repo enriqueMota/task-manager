@@ -88,13 +88,13 @@ This file defines the deterministic build order for the Task Manager monorepo.
 
 # 🖥 Phase 7 — Frontend Features
 
-- [ ] 37. Task list page
-- [ ] 38. Task create form
-- [ ] 39. Task edit page
-- [ ] 40. Task delete confirmation
-- [ ] 41. Task stats dashboard
-- [ ] 42. Loading states
-- [ ] 43. Error handling states
+- [x] 37. Task list page
+- [x] 38. Task create form
+- [x] 39. Task edit page
+- [x] 40. Task delete confirmation
+- [x] 41. Task stats dashboard
+- [x] 42. Loading states
+- [x] 43. Error handling states
 
 ---
 

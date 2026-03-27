@@ -1,0 +1,175 @@
+'use client';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TASK_PRIORITY_VALUES, TASK_STATUS_VALUES } from '@task-manager/shared';
+import { BarChart3, CheckCircle2, Clock, ListTodo } from 'lucide-react';
+import type { TaskStatsResponse } from '../api/types';
+import { PRIORITY_CONFIG, STATUS_CONFIG } from '../lib/task-display';
+
+interface StatsCardsProps {
+  stats: TaskStatsResponse | undefined;
+  isLoading: boolean;
+}
+
+export function StatsCards({ stats, isLoading }: StatsCardsProps): React.ReactElement {
+  if (isLoading) {
+    return <StatsCardsSkeleton />;
+  }
+
+  if (!stats) return <></>;
+
+  return (
+    <div className="space-y-4">
+      {/* Top-level summary */}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <SummaryCard
+          icon={<ListTodo className="size-4" />}
+          label="Total Tasks"
+          value={stats.total}
+          accent="text-primary"
+        />
+        <SummaryCard
+          icon={<Clock className="size-4" />}
+          label="Pending"
+          value={stats.byStatus.pending ?? 0}
+          accent="text-amber-600"
+        />
+        <SummaryCard
+          icon={<BarChart3 className="size-4" />}
+          label="In Progress"
+          value={stats.byStatus['in-progress'] ?? 0}
+          accent="text-blue-600"
+        />
+        <SummaryCard
+          icon={<CheckCircle2 className="size-4" />}
+          label="Completed"
+          value={stats.byStatus.completed ?? 0}
+          accent="text-emerald-600"
+        />
+      </div>
+
+      {/* Breakdown cards */}
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+        {/* By Status */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">By Status</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {TASK_STATUS_VALUES.map((status) => {
+              const count = stats.byStatus[status] ?? 0;
+              const pct = stats.total > 0 ? (count / stats.total) * 100 : 0;
+              const config = STATUS_CONFIG[status];
+              return (
+                <div key={status} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <span className={`size-2 rounded-full ${config.dotColor}`} />
+                      {config.label}
+                    </span>
+                    <span className="font-medium tabular-nums">{count}</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${config.dotColor}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        {/* By Priority */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">By Priority</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {TASK_PRIORITY_VALUES.map((priority) => {
+              const count = stats.byPriority[priority] ?? 0;
+              const pct = stats.total > 0 ? (count / stats.total) * 100 : 0;
+              const config = PRIORITY_CONFIG[priority];
+              const barColor =
+                priority === 'high' ? 'bg-red-500' : priority === 'medium' ? 'bg-orange-500' : 'bg-slate-400';
+              return (
+                <div key={priority} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-xs">{config.icon}</span>
+                      {config.label}
+                    </span>
+                    <span className="font-medium tabular-nums">{count}</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* --- Sub-components --- */
+
+interface SummaryCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  accent: string;
+}
+
+function SummaryCard({ icon, label, value, accent }: SummaryCardProps): React.ReactElement {
+  return (
+    <Card>
+      <CardContent className="p-4 flex items-center gap-3">
+        <div className={`rounded-lg bg-muted p-2 ${accent}`}>{icon}</div>
+        <div>
+          <p className="text-2xl font-bold tabular-nums">{value}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StatsCardsSkeleton(): React.ReactElement {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-4 flex items-center gap-3">
+              <Skeleton className="size-10 rounded-lg" />
+              <div className="space-y-1.5">
+                <Skeleton className="h-6 w-12" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-6 space-y-3">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-2 w-full" />
+              <Skeleton className="h-2 w-3/4" />
+              <Skeleton className="h-2 w-1/2" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
