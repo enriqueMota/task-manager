@@ -37,10 +37,10 @@ This file defines the deterministic build order for the Task Manager monorepo.
 
 # 🧱 Phase 2 — Shared Layer
 
-- [ ] 11. Create `TaskStatus` enum
-- [ ] 12. Create `TaskPriority` enum
-- [ ] 13. Export shared index
-- [ ] 14. Create shared Zod schemas
+- [x] 11. Create `TaskStatus` enum
+- [x] 12. Create `TaskPriority` enum
+- [x] 13. Export shared index
+- [x] 14. Create shared Zod schemas
 
 ---
 
