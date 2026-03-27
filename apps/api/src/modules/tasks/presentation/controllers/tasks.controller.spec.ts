@@ -165,13 +165,13 @@ describe('TasksController (integration)', () => {
     });
   });
 
-  describe('PATCH /tasks/:id', () => {
+  describe('PUT /tasks/:id', () => {
     it('returns 200 with updated task', async () => {
       const task = makeTask({ title: 'Updated' });
       mockUpdateUseCase.execute.mockResolvedValue(task);
 
       const res = await request(app.getHttpServer() as Server)
-        .patch(`/tasks/${TEST_UUID}`)
+        .put(`/tasks/${TEST_UUID}`)
         .send({ title: 'Updated' })
         .set('Content-Type', 'application/json');
 
@@ -185,7 +185,7 @@ describe('TasksController (integration)', () => {
       );
 
       const res = await request(app.getHttpServer() as Server)
-        .patch('/tasks/b1d9e3e0-0000-4000-a000-000000000001')
+        .put('/tasks/b1d9e3e0-0000-4000-a000-000000000001')
         .send({ title: 'Changed' })
         .set('Content-Type', 'application/json');
 

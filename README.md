@@ -53,6 +53,7 @@ modules/tasks/
 ```
 
 Each layer has strict import boundaries:
+
 - **Domain** has zero framework imports (no NestJS, no Prisma)
 - **Application** depends only on domain interfaces
 - **Infrastructure** implements domain interfaces using Prisma
@@ -70,6 +71,7 @@ features/tasks/
 ```
 
 State management is split by responsibility:
+
 - **Server state** → TanStack Query (caching, refetching, invalidation)
 - **UI state** → Zustand (filter selections, sort direction)
 - **Form state** → React Hook Form (validation, submission)
@@ -78,22 +80,22 @@ State management is split by responsibility:
 
 ## Tech Stack
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Backend | NestJS | 11.x |
-| Frontend | Next.js (App Router) | 16.2.1 |
-| Frontend | React | 19.2.4 |
-| Database | PostgreSQL | 15 |
-| ORM | Prisma | 7.6 |
-| Validation | Zod | 4.3.6 |
-| Forms | React Hook Form + Standard Schema Resolver | 7.72 / 5.2.2 |
-| State | Zustand | 5.x |
-| Data Fetching | TanStack Query | 5.x |
-| UI Components | shadcn/ui + Tailwind CSS | v4 |
-| Testing | Vitest + Testing Library | 4.1.2 |
-| API Docs | Swagger (via @nestjs/swagger) | 11.x |
-| Package Manager | pnpm (workspaces) | 10.x |
-| Containerization | Docker Compose | 3.8 |
+| Layer            | Technology                                 | Version      |
+| ---------------- | ------------------------------------------ | ------------ |
+| Backend          | NestJS                                     | 11.x         |
+| Frontend         | Next.js (App Router)                       | 16.2.1       |
+| Frontend         | React                                      | 19.2.4       |
+| Database         | PostgreSQL                                 | 15           |
+| ORM              | Prisma                                     | 7.6          |
+| Validation       | Zod                                        | 4.3.6        |
+| Forms            | React Hook Form + Standard Schema Resolver | 7.72 / 5.2.2 |
+| State            | Zustand                                    | 5.x          |
+| Data Fetching    | TanStack Query                             | 5.x          |
+| UI Components    | shadcn/ui + Tailwind CSS                   | v4           |
+| Testing          | Vitest + Testing Library                   | 4.1.2        |
+| API Docs         | Swagger (via @nestjs/swagger)              | 11.x         |
+| Package Manager  | pnpm (workspaces)                          | 10.x         |
+| Containerization | Docker Compose                             | 3.8          |
 
 ---
 
@@ -168,6 +170,7 @@ docker compose -f docker/docker-compose.yaml up -d
 ```
 
 This starts PostgreSQL 15 on port **5433** with:
+
 - User: `postgres`
 - Password: `postgres`
 - Database: `task_manager`
@@ -211,17 +214,17 @@ Base URL: `http://localhost:3000`
 
 ### Task Model
 
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| `id` | UUID | Auto | UUID v4 |
-| `title` | string | ✅ | 3–100 characters |
-| `description` | string | ❌ | Max 500 characters |
-| `status` | enum | ✅ | `pending` \| `in-progress` \| `completed` |
-| `priority` | enum | ✅ | `low` \| `medium` \| `high` |
-| `dueDate` | ISO 8601 | ❌ | Valid datetime string |
-| `assignee` | string | ❌ | Free text |
-| `createdAt` | ISO 8601 | Auto | Timestamp |
-| `updatedAt` | ISO 8601 | Auto | Timestamp |
+| Field         | Type     | Required | Validation                                |
+| ------------- | -------- | -------- | ----------------------------------------- |
+| `id`          | UUID     | Auto     | UUID v4                                   |
+| `title`       | string   | ✅       | 3–100 characters                          |
+| `description` | string   | ❌       | Max 500 characters                        |
+| `status`      | enum     | ✅       | `pending` \| `in-progress` \| `completed` |
+| `priority`    | enum     | ✅       | `low` \| `medium` \| `high`               |
+| `dueDate`     | ISO 8601 | ❌       | Valid datetime string                     |
+| `assignee`    | string   | ❌       | Free text                                 |
+| `createdAt`   | ISO 8601 | Auto     | Timestamp                                 |
+| `updatedAt`   | ISO 8601 | Auto     | Timestamp                                 |
 
 ### Endpoints
 
@@ -254,13 +257,13 @@ Base URL: `http://localhost:3000`
 
 #### `GET /tasks` — List tasks (with filtering & sorting)
 
-| Query Param | Values | Description |
-|-------------|--------|-------------|
-| `status` | `pending`, `in-progress`, `completed` | Filter by status |
-| `priority` | `low`, `medium`, `high` | Filter by priority |
-| `assignee` | Any string | Filter by assignee |
-| `sortField` | `dueDate`, `priority`, `createdAt` | Sort field |
-| `sortDirection` | `asc`, `desc` | Sort direction (default: `desc`) |
+| Query Param     | Values                                | Description                      |
+| --------------- | ------------------------------------- | -------------------------------- |
+| `status`        | `pending`, `in-progress`, `completed` | Filter by status                 |
+| `priority`      | `low`, `medium`, `high`               | Filter by priority               |
+| `assignee`      | Any string                            | Filter by assignee               |
+| `sortField`     | `dueDate`, `priority`, `createdAt`    | Sort field                       |
+| `sortDirection` | `asc`, `desc`                         | Sort direction (default: `desc`) |
 
 ```
 GET /tasks?status=pending&priority=high&sortField=dueDate&sortDirection=asc
@@ -270,7 +273,7 @@ GET /tasks?status=pending&priority=high&sortField=dueDate&sortDirection=asc
 
 Returns `200` with the task, or `404` if not found.
 
-#### `PATCH /tasks/:id` — Update a task (partial)
+#### `PUT /tasks/:id` — Update a task
 
 All fields are optional (partial update via `UpdateTaskSchema = CreateTaskSchema.partial()`).
 
@@ -302,18 +305,18 @@ Returns `204 No Content` on success.
 
 ## Frontend Features
 
-| Feature | Description |
-|---------|-------------|
-| **Task List** | Displays all tasks as cards with status/priority badges |
-| **Create Task** | Dialog form with Zod validation (shared schemas) |
-| **Edit Task** | Pre-filled form dialog, partial update via PATCH |
-| **Delete Task** | Confirmation dialog before deletion |
-| **Stats Dashboard** | Cards showing total, by-status, and by-priority counts |
-| **Filters** | Filter by status, priority; sort by date/priority/created |
-| **Loading States** | Skeleton loaders while data is fetching |
-| **Error Handling** | Error fallback component with retry |
-| **Empty States** | Contextual empty states (no tasks vs. no matches) |
-| **Toast Notifications** | Success/error feedback via Sonner |
+| Feature                 | Description                                               |
+| ----------------------- | --------------------------------------------------------- |
+| **Task List**           | Displays all tasks as cards with status/priority badges   |
+| **Create Task**         | Dialog form with Zod validation (shared schemas)          |
+| **Edit Task**           | Pre-filled form dialog, partial update via PUT            |
+| **Delete Task**         | Confirmation dialog before deletion                       |
+| **Stats Dashboard**     | Cards showing total, by-status, and by-priority counts    |
+| **Filters**             | Filter by status, priority; sort by date/priority/created |
+| **Loading States**      | Skeleton loaders while data is fetching                   |
+| **Error Handling**      | Error fallback component with retry                       |
+| **Empty States**        | Contextual empty states (no tasks vs. no matches)         |
+| **Toast Notifications** | Success/error feedback via Sonner                         |
 
 ---
 
@@ -342,14 +345,14 @@ cd apps/web && pnpm test:cov
 
 ### Test Strategy
 
-| Layer | Type | Tool | Count |
-|-------|------|------|-------|
-| Use-cases | Unit | Vitest | 24 |
-| Controller | Integration | Vitest + supertest | 6 |
-| Form validation | Unit | Vitest + Testing Library | 11 |
-| Component rendering | Unit | Vitest + Testing Library | 13 |
-| Zustand store | Unit | Vitest | 6 |
-| **Total** | | | **60** |
+| Layer               | Type        | Tool                     | Count  |
+| ------------------- | ----------- | ------------------------ | ------ |
+| Use-cases           | Unit        | Vitest                   | 24     |
+| Controller          | Integration | Vitest + supertest       | 6      |
+| Form validation     | Unit        | Vitest + Testing Library | 11     |
+| Component rendering | Unit        | Vitest + Testing Library | 13     |
+| Zustand store       | Unit        | Vitest                   | 6      |
+| **Total**           |             |                          | **60** |
 
 Backend tests mock repository interfaces — never Prisma directly — ensuring tests validate business logic isolation.
 
@@ -377,11 +380,11 @@ Frontend tests mock shadcn/ui components with native HTML elements to make form 
 
 **Why**: Zod v4 implements the Standard Schema specification. Using the standard schema resolver is the forward-compatible approach and eliminates the need for framework-specific adapters.
 
-### 4. PATCH Instead of PUT for Updates
+### 4. PUT with Partial Schema for Updates
 
-**Decision**: The update endpoint uses `PATCH /tasks/:id` with `CreateTaskSchema.partial()` rather than `PUT`.
+**Decision**: The update endpoint uses `PUT /tasks/:id` with `UpdateTaskSchema = CreateTaskSchema.partial()`.
 
-**Why**: PATCH semantics are more appropriate for task updates — users typically change one or two fields (e.g., status), not the entire resource. `UpdateTaskSchema = CreateTaskSchema.partial()` makes all fields optional, enabling true partial updates.
+**Why**: While PUT traditionally implies full resource replacement, using a partial Zod schema lets clients send only the fields they want to change. This meets the spec's `PUT` requirement while keeping the practical benefit of partial updates — users typically change one or two fields (e.g., status), not the entire resource.
 
 ### 5. Vertical Feature Slicing (Frontend)
 
@@ -425,17 +428,17 @@ These files act as a "constitution" — every AI agent session inherits these co
 
 The project was built in **9 phases / 50 tasks**, each with a clear scope:
 
-| Phase | Focus | Tasks |
-|-------|-------|-------|
-| 1 | Monorepo foundation | 1–10 |
-| 2 | Shared validation layer | 11–14 |
-| 3 | Backend architecture skeleton | 15–21 |
-| 4 | Use-cases + unit tests | 22–27 |
-| 5 | Controllers + integration | 28–31 |
-| 6 | Frontend foundation | 32–36 |
-| 7 | Frontend features | 37–43 |
-| 8 | Frontend tests | 44–45 |
-| 9 | Finalization | 46–50 |
+| Phase | Focus                         | Tasks |
+| ----- | ----------------------------- | ----- |
+| 1     | Monorepo foundation           | 1–10  |
+| 2     | Shared validation layer       | 11–14 |
+| 3     | Backend architecture skeleton | 15–21 |
+| 4     | Use-cases + unit tests        | 22–27 |
+| 5     | Controllers + integration     | 28–31 |
+| 6     | Frontend foundation           | 32–36 |
+| 7     | Frontend features             | 37–43 |
+| 8     | Frontend tests                | 44–45 |
+| 9     | Finalization                  | 46–50 |
 
 Each task had preconditions: code must compile, lint must pass, tests must pass before marking complete.
 
@@ -457,16 +460,16 @@ Each task had preconditions: code must compile, lint must pass, tests must pass 
 
 ## Trade-offs
 
-| Decision | Trade-off | Rationale |
-|----------|-----------|-----------|
-| **PATCH vs PUT** | Less strict REST semantics | Partial updates are more practical for task editing — users change 1-2 fields, not the full resource |
-| **No pagination** | Full list fetched every time | Scope decision — acceptable for a task manager with moderate data; pagination would add complexity to both API and frontend |
-| **Prisma as ORM** | Query builder abstraction overhead | Prisma's type-safe queries and auto-generated client outweigh raw SQL flexibility for this use case |
-| **String enums in DB** | Not using PostgreSQL native enums | Prisma string fields with Zod validation at the application boundary; avoids migration pain when adding enum values |
-| **No authentication** | No user isolation | Out of scope for this exercise; the `assignee` field is free text |
-| **standardSchemaResolver** | Newer, less documented | Forward-compatible with Zod v4 Standard Schema spec; required discovering the correct import path during development |
-| **Server Components not used** | All components are client-side | Task management requires heavy interactivity (forms, filters, dialogs) — Server Components would add complexity without meaningful benefit here |
-| **60 tests, no E2E** | No browser-based integration tests | Unit + integration tests cover business logic and component behavior; E2E (Playwright/Cypress) would be the next step for a production app |
+| Decision                       | Trade-off                          | Rationale                                                                                                                                       |
+| ------------------------------ | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PUT with partial schema**    | Not strict PUT semantics           | Meets spec requirement for PUT while allowing partial updates via `CreateTaskSchema.partial()` — practical for task editing                      |
+| **No pagination**              | Full list fetched every time       | Scope decision — acceptable for a task manager with moderate data; pagination would add complexity to both API and frontend                     |
+| **Prisma as ORM**              | Query builder abstraction overhead | Prisma's type-safe queries and auto-generated client outweigh raw SQL flexibility for this use case                                             |
+| **String enums in DB**         | Not using PostgreSQL native enums  | Prisma string fields with Zod validation at the application boundary; avoids migration pain when adding enum values                             |
+| **No authentication**          | No user isolation                  | Out of scope for this exercise; the `assignee` field is free text                                                                               |
+| **standardSchemaResolver**     | Newer, less documented             | Forward-compatible with Zod v4 Standard Schema spec; required discovering the correct import path during development                            |
+| **Server Components not used** | All components are client-side     | Task management requires heavy interactivity (forms, filters, dialogs) — Server Components would add complexity without meaningful benefit here |
+| **60 tests, no E2E**           | No browser-based integration tests | Unit + integration tests cover business logic and component behavior; E2E (Playwright/Cypress) would be the next step for a production app      |
 
 ---
 

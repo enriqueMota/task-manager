@@ -47,7 +47,7 @@ export const tasksApi = {
 
   update: (id: string, dto: UpdateTaskDto): Promise<TaskResponse> => {
     return apiFetch<TaskResponse>(`/tasks/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(dto),
     });
   },
