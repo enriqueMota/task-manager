@@ -69,10 +69,10 @@ This file defines the deterministic build order for the Task Manager monorepo.
 
 # 🌐 Phase 5 — Controllers + Integration
 
-- [ ] 28. Create task controller
-- [ ] 29. Wire DI in module
-- [ ] 30. Add integration test (supertest)
-- [ ] 31. Setup Swagger documentation
+- [x] 28. Create task controller
+- [x] 29. Wire DI in module
+- [x] 30. Add integration test (supertest)
+- [x] 31. Setup Swagger documentation
 
 ---
 

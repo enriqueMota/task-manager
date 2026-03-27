@@ -25,9 +25,9 @@ export class TaskEntity {
     this.id = props.id;
     this.title = props.title;
     this.description = props.description;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     this.status = props.status;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     this.priority = props.priority;
     this.dueDate = props.dueDate;
     this.assignee = props.assignee;

@@ -8,7 +8,7 @@ const tsconfigRootDir = new URL('.', import.meta.url).pathname;
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: ['eslint.config.mjs', 'src/generated/**'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -42,6 +42,19 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
+    },
+  },
+  {
+    // presentation layer imports from @task-manager/shared via pnpm symlink —
+    // ESLint projectService cannot resolve the symlink so it marks types as
+    // "error typed".  tsc --noEmit passes cleanly; these are false positives.
+    files: ['**/presentation/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
     },
   },
 );

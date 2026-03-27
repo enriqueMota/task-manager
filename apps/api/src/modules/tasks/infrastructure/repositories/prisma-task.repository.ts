@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../../generated/prisma/index.js';
+import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../../generated/prisma/index.js';
 import { TaskMapper } from '../mappers/task.mapper.js';
 import { TaskEntity } from '../../domain/entities/task.entity.js';
@@ -8,9 +8,11 @@ import type {
   TaskSort,
   TaskStats,
 } from '../../domain/repositories/task.repository.interface.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
+@Injectable()
 export class PrismaTaskRepository implements TaskRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(task: TaskEntity): Promise<TaskEntity> {
     const record = await this.prisma.task.create({
@@ -27,9 +29,8 @@ export class PrismaTaskRepository implements TaskRepository {
   async findAll(filters?: TaskFilters, sort?: TaskSort): Promise<TaskEntity[]> {
     const where: Prisma.TaskWhereInput = {};
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     if (filters?.status !== undefined) where.status = filters.status;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     if (filters?.priority !== undefined) where.priority = filters.priority;
     if (filters?.assignee !== undefined) where.assignee = filters.assignee;
 

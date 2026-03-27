@@ -9,9 +9,9 @@ export class TaskMapper {
       id: record.id,
       title: record.title,
       description: record.description ?? undefined,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       status: record.status as TaskStatus,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       priority: record.priority as TaskPriority,
       dueDate: record.dueDate ?? undefined,
       assignee: record.assignee ?? undefined,
@@ -25,9 +25,9 @@ export class TaskMapper {
       id: task.id,
       title: task.title,
       description: task.description,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       status: task.status,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       priority: task.priority,
       dueDate: task.dueDate,
       assignee: task.assignee,
@@ -38,9 +38,9 @@ export class TaskMapper {
     return {
       title: task.title,
       description: task.description,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       status: task.status,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       priority: task.priority,
       dueDate: task.dueDate,
       assignee: task.assignee,
