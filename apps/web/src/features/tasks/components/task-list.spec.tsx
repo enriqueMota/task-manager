@@ -23,7 +23,13 @@ vi.mock('@/components/ui/card', () => ({
     onKeyDown?: (e: React.KeyboardEvent) => void;
     className?: string;
   }) => (
-    <div role={role ?? 'article'} tabIndex={tabIndex} onClick={onClick} onKeyDown={onKeyDown} className={className}>
+    <div
+      role={role ?? 'article'}
+      tabIndex={tabIndex}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      className={className}
+    >
       {children}
     </div>
   ),
@@ -50,9 +56,7 @@ vi.mock('lucide-react', () => ({
 
 // Stub badge components — they render their label as text which is enough for assertions
 vi.mock('./status-badge', () => ({
-  StatusBadge: ({ status }: { status: string }) => (
-    <span data-testid="status-badge">{status}</span>
-  ),
+  StatusBadge: ({ status }: { status: string }) => <span data-testid="status-badge">{status}</span>,
 }));
 
 vi.mock('./priority-badge', () => ({
@@ -169,9 +173,7 @@ describe('TaskList', () => {
 
 describe('EmptyState', () => {
   it('shows "No tasks yet" and Create task button when hasFilters is false', () => {
-    render(
-      <EmptyState hasFilters={false} onClearFilters={vi.fn()} onCreateTask={vi.fn()} />,
-    );
+    render(<EmptyState hasFilters={false} onClearFilters={vi.fn()} onCreateTask={vi.fn()} />);
 
     expect(screen.getByText(/no tasks yet/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create task/i })).toBeInTheDocument();
@@ -179,9 +181,7 @@ describe('EmptyState', () => {
   });
 
   it('shows "No matching tasks" and Clear filters button when hasFilters is true', () => {
-    render(
-      <EmptyState hasFilters={true} onClearFilters={vi.fn()} onCreateTask={vi.fn()} />,
-    );
+    render(<EmptyState hasFilters={true} onClearFilters={vi.fn()} onCreateTask={vi.fn()} />);
 
     expect(screen.getByText(/no matching tasks/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /clear filters/i })).toBeInTheDocument();
@@ -191,9 +191,7 @@ describe('EmptyState', () => {
   it('calls onClearFilters when Clear filters button is clicked', async () => {
     const onClearFilters = vi.fn();
     const user = userEvent.setup();
-    render(
-      <EmptyState hasFilters={true} onClearFilters={onClearFilters} onCreateTask={vi.fn()} />,
-    );
+    render(<EmptyState hasFilters={true} onClearFilters={onClearFilters} onCreateTask={vi.fn()} />);
 
     await user.click(screen.getByRole('button', { name: /clear filters/i }));
 
@@ -203,9 +201,7 @@ describe('EmptyState', () => {
   it('calls onCreateTask when Create task button is clicked', async () => {
     const onCreateTask = vi.fn();
     const user = userEvent.setup();
-    render(
-      <EmptyState hasFilters={false} onClearFilters={vi.fn()} onCreateTask={onCreateTask} />,
-    );
+    render(<EmptyState hasFilters={false} onClearFilters={vi.fn()} onCreateTask={onCreateTask} />);
 
     await user.click(screen.getByRole('button', { name: /create task/i }));
 
