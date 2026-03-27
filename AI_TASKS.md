@@ -22,16 +22,16 @@ This file defines the deterministic build order for the Task Manager monorepo.
 
 # 🏗 Phase 1 — Monorepo Foundation
 
-- [ ] 1. Initialize pnpm workspace
-- [ ] 2. Create `apps/api` (NestJS)
-- [ ] 3. Create `apps/web` (Next.js App Router)
-- [ ] 4. Create `packages/shared`
-- [ ] 5. Configure base `tsconfig`
-- [ ] 6. Setup ESLint + Prettier (strict)
-- [ ] 7. Configure path aliases
-- [ ] 8. Setup Vitest (api + web)
-- [ ] 9. Setup Docker Postgres
-- [ ] 10. Setup Prisma in backend
+- [x] 1. Initialize pnpm workspace
+- [x] 2. Create `apps/api` (NestJS)
+- [x] 3. Create `apps/web` (Next.js App Router)
+- [x] 4. Create `packages/shared`
+- [x] 5. Configure base `tsconfig`
+- [x] 6. Setup ESLint + Prettier (strict)
+- [x] 7. Configure path aliases
+- [x] 8. Setup Vitest (api + web)
+- [x] 9. Setup Docker Postgres
+- [x] 10. Setup Prisma in backend
 
 ---
 
