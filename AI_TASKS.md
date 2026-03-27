@@ -58,12 +58,12 @@ This file defines the deterministic build order for the Task Manager monorepo.
 
 # ⚙ Phase 4 — Backend Use Cases + Unit Tests
 
-- [ ] 22. CreateTask use-case + unit test
-- [ ] 23. ListTasks use-case + unit test
-- [ ] 24. GetTask use-case + unit test
-- [ ] 25. UpdateTask use-case + unit test
-- [ ] 26. DeleteTask use-case + unit test
-- [ ] 27. GetTaskStats use-case + unit test
+- [x] 22. CreateTask use-case + unit test
+- [x] 23. ListTasks use-case + unit test
+- [x] 24. GetTask use-case + unit test
+- [x] 25. UpdateTask use-case + unit test
+- [x] 26. DeleteTask use-case + unit test
+- [x] 27. GetTaskStats use-case + unit test
 
 ---
 
