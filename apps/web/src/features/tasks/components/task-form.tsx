@@ -51,8 +51,17 @@ export function TaskForm({
     },
   });
 
+  const onSubmitInternal = (data: CreateTaskDto): void => {
+    const payload: CreateTaskDto = {
+      ...data,
+      dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
+    };
+
+    onSubmit(payload);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmitInternal)} className="space-y-5">
       {/* Title */}
       <div className="space-y-2">
         <Label htmlFor="title">

@@ -13,7 +13,19 @@ export const CreateTaskSchema = z.object({
   description: z.string().max(500, 'Description must be at most 500 characters').optional(),
   status: TaskStatusSchema,
   priority: TaskPrioritySchema,
-  dueDate: z.iso.datetime({ message: 'dueDate must be a valid ISO date string' }).optional(),
+  dueDate: z.preprocess(
+    (value) => {
+      if (value === undefined || value === null || value === '') return undefined;
+      if (typeof value !== 'string') return value;
+
+      const parsedDate = new Date(value);
+      if (Number.isNaN(parsedDate.getTime())) return value;
+
+      // Convert local datetime-local string (e.g. 2026-03-28T19:15) to UTC ISO format
+      return parsedDate.toISOString();
+    },
+    z.string().datetime({ offset: true, message: 'dueDate must be a valid ISO date string' }).optional(),
+  ),
   assignee: z.string().optional(),
 });
 
