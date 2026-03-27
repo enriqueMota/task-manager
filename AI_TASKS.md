@@ -78,11 +78,11 @@ This file defines the deterministic build order for the Task Manager monorepo.
 
 # 🎨 Phase 6 — Frontend Foundation
 
-- [ ] 32. Setup Shadcn
-- [ ] 33. Setup Tailwind
-- [ ] 34. Setup TanStack Query
-- [ ] 35. Setup Zustand store
-- [ ] 36. Integrate shared Zod schemas
+- [x] 32. Setup Shadcn
+- [x] 33. Setup Tailwind
+- [x] 34. Setup TanStack Query
+- [x] 35. Setup Zustand store
+- [x] 36. Integrate shared Zod schemas
 
 ---
 
