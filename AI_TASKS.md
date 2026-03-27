@@ -110,5 +110,5 @@ This file defines the deterministic build order for the Task Manager monorepo.
 - [x] 46. Add DB indexes for filtering
 - [x] 47. Performance review
 - [x] 48. Final lint pass
-- [ ] 49. Write README architecture section
-- [ ] 50. Write AI collaboration reflection
+- [x] 49. Write README architecture section
+- [x] 50. Write AI collaboration reflection
