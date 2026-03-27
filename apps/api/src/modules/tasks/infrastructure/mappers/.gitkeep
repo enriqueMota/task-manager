@@ -1,0 +1,2 @@
+// TaskMapper maps Prisma models → domain TaskEntity.
+// Will be implemented in task 21.

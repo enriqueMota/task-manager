@@ -1,0 +1,3 @@
+// TasksController handles HTTP routes for /tasks.
+// No business logic here — delegates entirely to use-cases.
+// Will be implemented in task 28.

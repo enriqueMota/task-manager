@@ -1,0 +1,3 @@
+// PrismaTaskRepository implements TaskRepository from the domain layer.
+// Prisma is ONLY allowed in this infrastructure layer.
+// Will be implemented in task 20.

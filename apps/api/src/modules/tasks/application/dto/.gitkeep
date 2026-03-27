@@ -1,0 +1,2 @@
+// Response DTOs for the presentation layer will live here.
+// They map domain entities to plain objects safe for HTTP responses.

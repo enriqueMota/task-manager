@@ -46,13 +46,13 @@ This file defines the deterministic build order for the Task Manager monorepo.
 
 # 🧠 Phase 3 — Backend Architecture Skeleton
 
-- [ ] 15. Create tasks module structure
-- [ ] 16. Define domain entity
-- [ ] 17. Define repository interface
-- [ ] 18. Setup Prisma schema
-- [ ] 19. Generate Prisma client
-- [ ] 20. Implement Prisma repository
-- [ ] 21. Implement mapper layer
+- [x] 15. Create tasks module structure
+- [x] 16. Define domain entity
+- [x] 17. Define repository interface
+- [x] 18. Setup Prisma schema
+- [x] 19. Generate Prisma client
+- [x] 20. Implement Prisma repository
+- [x] 21. Implement mapper layer
 
 ---
 
