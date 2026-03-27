@@ -139,7 +139,11 @@ export function TaskForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="dueDate">Due Date</Label>
-          <Input id="dueDate" type="datetime-local" {...register('dueDate')} />
+          <Input
+            id="dueDate"
+            type="datetime-local"
+            {...register('dueDate', { setValueAs: (v: unknown) => (v === '' ? undefined : v) })}
+          />
           {errors.dueDate && <p className="text-xs text-destructive">{errors.dueDate.message}</p>}
         </div>
 

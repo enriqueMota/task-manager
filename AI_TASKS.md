@@ -100,8 +100,8 @@ This file defines the deterministic build order for the Task Manager monorepo.
 
 # 🧪 Phase 8 — Frontend Tests
 
-- [ ] 44. Task form validation test
-- [ ] 45. Task table rendering test
+- [x] 44. Task form validation test
+- [x] 45. Task table rendering test
 
 ---
 
