@@ -35,8 +35,8 @@ export function DeleteTaskDialog({
           <AlertDialogTitle>Delete task?</AlertDialogTitle>
           <AlertDialogDescription>
             This will permanently delete{' '}
-            <span className="font-medium text-foreground">&ldquo;{task?.title}&rdquo;</span>.
-            This action cannot be undone.
+            <span className="font-medium text-foreground">&ldquo;{task?.title}&rdquo;</span>. This
+            action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

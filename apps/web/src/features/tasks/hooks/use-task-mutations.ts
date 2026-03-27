@@ -5,7 +5,9 @@ import { tasksApi } from '../api/tasks.api';
 import type { TaskResponse } from '../api/types';
 import { taskKeys } from './task-keys';
 
-export function useCreateTask(): ReturnType<typeof useMutation<TaskResponse, Error, CreateTaskDto>> {
+export function useCreateTask(): ReturnType<
+  typeof useMutation<TaskResponse, Error, CreateTaskDto>
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -21,7 +23,9 @@ export function useCreateTask(): ReturnType<typeof useMutation<TaskResponse, Err
   });
 }
 
-export function useUpdateTask(): ReturnType<typeof useMutation<TaskResponse, Error, { id: string; dto: UpdateTaskDto }>> {
+export function useUpdateTask(): ReturnType<
+  typeof useMutation<TaskResponse, Error, { id: string; dto: UpdateTaskDto }>
+> {
   const queryClient = useQueryClient();
 
   return useMutation({

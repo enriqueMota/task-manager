@@ -25,7 +25,9 @@ export function TaskFilters(): React.ReactElement {
       {/* Status filter */}
       <Select
         value={status ?? 'all'}
-        onValueChange={(val) => setFilter({ status: val === 'all' ? undefined : (val as TaskStatus) })}
+        onValueChange={(val) =>
+          setFilter({ status: val === 'all' ? undefined : (val as TaskStatus) })
+        }
       >
         <SelectTrigger className="w-full sm:w-[160px]">
           <SelectValue placeholder="All statuses" />
@@ -43,7 +45,9 @@ export function TaskFilters(): React.ReactElement {
       {/* Priority filter */}
       <Select
         value={priority ?? 'all'}
-        onValueChange={(val) => setFilter({ priority: val === 'all' ? undefined : (val as TaskPriority) })}
+        onValueChange={(val) =>
+          setFilter({ priority: val === 'all' ? undefined : (val as TaskPriority) })
+        }
       >
         <SelectTrigger className="w-full sm:w-[160px]">
           <SelectValue placeholder="All priorities" />

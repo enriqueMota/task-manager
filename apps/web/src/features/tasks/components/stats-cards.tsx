@@ -93,7 +93,11 @@ export function StatsCards({ stats, isLoading }: StatsCardsProps): React.ReactEl
               const pct = stats.total > 0 ? (count / stats.total) * 100 : 0;
               const config = PRIORITY_CONFIG[priority];
               const barColor =
-                priority === 'high' ? 'bg-red-500' : priority === 'medium' ? 'bg-orange-500' : 'bg-slate-400';
+                priority === 'high'
+                  ? 'bg-red-500'
+                  : priority === 'medium'
+                    ? 'bg-orange-500'
+                    : 'bg-slate-400';
               return (
                 <div key={priority} className="space-y-1">
                   <div className="flex items-center justify-between text-sm">

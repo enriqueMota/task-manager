@@ -56,7 +56,9 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps): React.React
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border/50">
           <div className="flex items-center gap-3">
             {task.dueDate && (
-              <span className={cn('flex items-center gap-1', overdue && 'text-red-600 font-medium')}>
+              <span
+                className={cn('flex items-center gap-1', overdue && 'text-red-600 font-medium')}
+              >
                 <Calendar className="size-3" />
                 {formatDate(task.dueDate)}
               </span>

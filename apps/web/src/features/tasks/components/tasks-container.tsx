@@ -110,11 +110,7 @@ export function TasksContainer(): React.ReactElement {
           onRetry={() => void tasksQuery.refetch()}
         />
       ) : tasksQuery.data && tasksQuery.data.length > 0 ? (
-        <TaskList
-          tasks={tasksQuery.data}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-        />
+        <TaskList tasks={tasksQuery.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
       ) : (
         <EmptyState
           hasFilters={hasFilters}

@@ -12,11 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import {
-  CreateTaskSchema,
-  TASK_PRIORITY_VALUES,
-  TASK_STATUS_VALUES,
-} from '@task-manager/shared';
+import { CreateTaskSchema, TASK_PRIORITY_VALUES, TASK_STATUS_VALUES } from '@task-manager/shared';
 import type { CreateTaskDto } from '@task-manager/shared';
 import { Loader2 } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
@@ -68,9 +64,7 @@ export function TaskForm({
           {...register('title')}
           aria-invalid={!!errors.title}
         />
-        {errors.title && (
-          <p className="text-xs text-destructive">{errors.title.message}</p>
-        )}
+        {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
       </div>
 
       {/* Description */}
@@ -112,9 +106,7 @@ export function TaskForm({
               </Select>
             )}
           />
-          {errors.status && (
-            <p className="text-xs text-destructive">{errors.status.message}</p>
-          )}
+          {errors.status && <p className="text-xs text-destructive">{errors.status.message}</p>}
         </div>
 
         <div className="space-y-2">
@@ -139,9 +131,7 @@ export function TaskForm({
               </Select>
             )}
           />
-          {errors.priority && (
-            <p className="text-xs text-destructive">{errors.priority.message}</p>
-          )}
+          {errors.priority && <p className="text-xs text-destructive">{errors.priority.message}</p>}
         </div>
       </div>
 
@@ -150,21 +140,13 @@ export function TaskForm({
         <div className="space-y-2">
           <Label htmlFor="dueDate">Due Date</Label>
           <Input id="dueDate" type="datetime-local" {...register('dueDate')} />
-          {errors.dueDate && (
-            <p className="text-xs text-destructive">{errors.dueDate.message}</p>
-          )}
+          {errors.dueDate && <p className="text-xs text-destructive">{errors.dueDate.message}</p>}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="assignee">Assignee</Label>
-          <Input
-            id="assignee"
-            placeholder="Assign to..."
-            {...register('assignee')}
-          />
-          {errors.assignee && (
-            <p className="text-xs text-destructive">{errors.assignee.message}</p>
-          )}
+          <Input id="assignee" placeholder="Assign to..." {...register('assignee')} />
+          {errors.assignee && <p className="text-xs text-destructive">{errors.assignee.message}</p>}
         </div>
       </div>
 
