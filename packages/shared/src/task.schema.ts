@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { TASK_STATUS_VALUES } from './task-status.js';
-import { TASK_PRIORITY_VALUES } from './task-priority.js';
+import { TASK_STATUS_VALUES } from './task-status';
+import { TASK_PRIORITY_VALUES } from './task-priority';
 
 export const TaskStatusSchema = z.enum(TASK_STATUS_VALUES);
 export const TaskPrioritySchema = z.enum(TASK_PRIORITY_VALUES);

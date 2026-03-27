@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Inject,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -54,11 +55,17 @@ import type { TaskStatus, TaskPriority } from '@task-manager/shared';
 @Controller('tasks')
 export class TasksController {
   constructor(
+    @Inject(CreateTaskUseCase)
     private readonly createTaskUseCase: CreateTaskUseCase,
+    @Inject(ListTasksUseCase)
     private readonly listTasksUseCase: ListTasksUseCase,
+    @Inject(GetTaskUseCase)
     private readonly getTaskUseCase: GetTaskUseCase,
+    @Inject(UpdateTaskUseCase)
     private readonly updateTaskUseCase: UpdateTaskUseCase,
+    @Inject(DeleteTaskUseCase)
     private readonly deleteTaskUseCase: DeleteTaskUseCase,
+    @Inject(GetTaskStatsUseCase)
     private readonly getTaskStatsUseCase: GetTaskStatsUseCase,
   ) {}
 

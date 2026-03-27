@@ -1,4 +1,13 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "paths": {
+      "@task-manager/shared": ["../../../packages/shared/src/index.ts"],
+      "@task-manager/shared/*": ["../../../packages/shared/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }

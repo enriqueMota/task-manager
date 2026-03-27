@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import type { Prisma } from '../../../../generated/prisma/index.js';
 import { TaskMapper } from '../mappers/task.mapper.js';
 import { TaskEntity } from '../../domain/entities/task.entity.js';
@@ -12,7 +12,9 @@ import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class PrismaTaskRepository implements TaskRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+  ) {}
 
   async create(task: TaskEntity): Promise<TaskEntity> {
     const record = await this.prisma.task.create({

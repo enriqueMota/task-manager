@@ -10,10 +10,18 @@ out/
 dist/
 build/
 coverage/
+*.tsbuildinfo
 
-# Prisma (legacy/custom output)
-apps/api/generated/
-generated/
+# Compiled JS output (keep source .ts only)
+*.js.map
+apps/api/*.js
+apps/api/*.d.ts
+packages/shared/src/*.js
+packages/shared/src/*.d.ts
+packages/shared/src/*.js.map
+
+# Prisma generated client (lives in node_modules)
+apps/api/src/generated/
 
 # Env
 .env

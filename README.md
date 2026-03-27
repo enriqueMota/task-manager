@@ -86,7 +86,8 @@ State management is split by responsibility:
 | Frontend         | Next.js (App Router)                       | 16.2.1       |
 | Frontend         | React                                      | 19.2.4       |
 | Database         | PostgreSQL                                 | 15           |
-| ORM              | Prisma                                     | 7.6          |
+| ORM              | Prisma + @prisma/adapter-pg                | 7.6          |
+| Dev Runner       | tsx (esbuild-based)                        | 4.x          |
 | Validation       | Zod                                        | 4.3.6        |
 | Forms            | React Hook Form + Standard Schema Resolver | 7.72 / 5.2.2 |
 | State            | Zustand                                    | 5.x          |
@@ -183,11 +184,12 @@ Create `apps/api/.env`:
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/task_manager"
 ```
 
-### 4. Run Migrations
+### 4. Run Migrations & Generate Prisma Client
 
 ```bash
 cd apps/api
 pnpm exec prisma migrate dev
+pnpm exec prisma generate
 ```
 
 ### 5. Start Both Apps
@@ -201,6 +203,8 @@ pnpm dev:api
 # Terminal 2 — Frontend (http://localhost:3001)
 pnpm dev:web
 ```
+
+> **Note:** The API dev server uses [tsx](https://tsx.is/) instead of the default `nest start --watch`. This is because the monorepo's `module: "nodenext"` setting and cross-package path aliases prevent the NestJS built-in compiler from resolving imports correctly at runtime. `tsx` runs TypeScript directly via `esbuild`, bypassing the compilation step entirely.
 
 ### 6. Explore the API
 
@@ -404,7 +408,13 @@ Frontend tests mock shadcn/ui components with native HTML elements to make form 
 
 **Why**: Enables granular cache invalidation. After a mutation, we invalidate `taskKeys.lists()` and `taskKeys.stats()` without touching individual detail caches, keeping the UI responsive.
 
-### 8. Monorepo with pnpm Workspaces
+### 8. Prisma v7 Driver Adapter
+
+**Decision**: Used `@prisma/adapter-pg` with the `pg` driver instead of the default Prisma connection.
+
+**Why**: Prisma v7 requires an explicit driver adapter — `new PrismaClient()` without an adapter throws an error. The `PrismaPg` adapter wraps a PostgreSQL connection string and is passed to the `PrismaService` constructor. This also enables future flexibility (e.g., switching to `@prisma/adapter-neon` for serverless).
+
+### 9. Monorepo with pnpm Workspaces
 
 **Decision**: Single repository with `apps/api`, `apps/web`, and `packages/shared`.
 
@@ -462,7 +472,7 @@ Each task had preconditions: code must compile, lint must pass, tests must pass 
 
 | Decision                       | Trade-off                          | Rationale                                                                                                                                       |
 | ------------------------------ | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **PUT with partial schema**    | Not strict PUT semantics           | Meets spec requirement for PUT while allowing partial updates via `CreateTaskSchema.partial()` — practical for task editing                      |
+| **PUT with partial schema**    | Not strict PUT semantics           | Meets spec requirement for PUT while allowing partial updates via `CreateTaskSchema.partial()` — practical for task editing                     |
 | **No pagination**              | Full list fetched every time       | Scope decision — acceptable for a task manager with moderate data; pagination would add complexity to both API and frontend                     |
 | **Prisma as ORM**              | Query builder abstraction overhead | Prisma's type-safe queries and auto-generated client outweigh raw SQL flexibility for this use case                                             |
 | **String enums in DB**         | Not using PostgreSQL native enums  | Prisma string fields with Zod validation at the application boundary; avoids migration pain when adding enum values                             |
@@ -470,6 +480,7 @@ Each task had preconditions: code must compile, lint must pass, tests must pass 
 | **standardSchemaResolver**     | Newer, less documented             | Forward-compatible with Zod v4 Standard Schema spec; required discovering the correct import path during development                            |
 | **Server Components not used** | All components are client-side     | Task management requires heavy interactivity (forms, filters, dialogs) — Server Components would add complexity without meaningful benefit here |
 | **60 tests, no E2E**           | No browser-based integration tests | Unit + integration tests cover business logic and component behavior; E2E (Playwright/Cypress) would be the next step for a production app      |
+| **tsx for dev mode**            | Not using Nest CLI compiler        | `nest start --watch` fails with `module: "nodenext"` + monorepo path aliases; tsx runs TypeScript directly via esbuild, requiring explicit `@Inject()` decorators since esbuild doesn't emit decorator metadata |
 
 ---
 
@@ -477,8 +488,8 @@ Each task had preconditions: code must compile, lint must pass, tests must pass 
 
 ```bash
 # Development
-pnpm dev:api              # Start NestJS in watch mode
-pnpm dev:web              # Start Next.js dev server
+pnpm dev:api              # Start API with tsx watch (port 3000)
+pnpm dev:web              # Start Next.js dev server (port 3001)
 
 # Building
 pnpm build                # Build both apps
