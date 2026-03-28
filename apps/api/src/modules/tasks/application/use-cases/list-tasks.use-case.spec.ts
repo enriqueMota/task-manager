@@ -43,7 +43,10 @@ describe('ListTasksUseCase', () => {
     const result = await useCase.execute({});
 
     expect(result.items).toHaveLength(2);
-    expect(repo.findAll).toHaveBeenCalledWith(undefined, undefined, { page: 1, pageSize: 10 });
+    expect(repo.findAll).toHaveBeenCalledWith(undefined, undefined, {
+      page: 1,
+      pageSize: 10,
+    });
   });
 
   it('passes filters and sort to the repository', async () => {
@@ -58,7 +61,10 @@ describe('ListTasksUseCase', () => {
 
     await useCase.execute({ filters, sort });
 
-    expect(repo.findAll).toHaveBeenCalledWith(filters, sort, { page: 1, pageSize: 10 });
+    expect(repo.findAll).toHaveBeenCalledWith(filters, sort, {
+      page: 1,
+      pageSize: 10,
+    });
   });
 
   it('returns empty array when no tasks exist', async () => {

@@ -20,8 +20,8 @@ export function StatsCards({ stats, isLoading }: StatsCardsProps): React.ReactEl
   if (!stats) return <></>;
 
   return (
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[2fr_1fr]">
-      <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_1fr]">
+      <div className="grid grid-cols-1 gap-2">
         <SummaryCard
           icon={<ListTodo className="size-4" />}
           label="Total Tasks"
@@ -130,10 +130,10 @@ interface SummaryCardProps {
 function SummaryCard({ icon, label, value, accent }: SummaryCardProps): React.ReactElement {
   return (
     <Card>
-      <CardContent className="p-3 flex items-center gap-2.5">
+      <CardContent className="p-1.5 flex items-center gap-2">
         <div className={`rounded-lg bg-muted p-2 ${accent}`}>{icon}</div>
         <div>
-          <p className="text-xl font-bold tabular-nums">{value}</p>
+          <p className="text-base font-bold tabular-nums">{value}</p>
           <p className="text-xs text-muted-foreground">{label}</p>
         </div>
       </CardContent>
@@ -143,11 +143,11 @@ function SummaryCard({ icon, label, value, accent }: SummaryCardProps): React.Re
 
 function StatsCardsSkeleton(): React.ReactElement {
   return (
-    <div className="space-y-3">
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_1fr]">
+      <div className="grid grid-cols-1 gap-2">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
-            <CardContent className="p-3 flex items-center gap-2.5">
+            <CardContent className="p-2 flex items-center gap-2">
               <Skeleton className="size-10 rounded-lg" />
               <div className="space-y-1.5">
                 <Skeleton className="h-5 w-10" />
@@ -157,7 +157,7 @@ function StatsCardsSkeleton(): React.ReactElement {
           </Card>
         ))}
       </div>
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+      <div className="space-y-2">
         {Array.from({ length: 2 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-6 space-y-3">
