@@ -20,8 +20,8 @@ export function StatsCards({ stats, isLoading }: StatsCardsProps): React.ReactEl
   if (!stats) return <></>;
 
   return (
-    <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_1fr]">
-      <div className="grid grid-cols-1 gap-2">
+    <div className="grid grid-cols-1 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <SummaryCard
           icon={<ListTodo className="size-4" />}
           label="Total Tasks"
@@ -47,7 +47,7 @@ export function StatsCards({ stats, isLoading }: StatsCardsProps): React.ReactEl
           accent="text-emerald-600"
         />
       </div>
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">By Status</CardTitle>
@@ -130,7 +130,7 @@ interface SummaryCardProps {
 function SummaryCard({ icon, label, value, accent }: SummaryCardProps): React.ReactElement {
   return (
     <Card>
-      <CardContent className="p-1.5 flex items-center gap-2">
+      <CardContent className="p-1.5 flex justify-center items-center gap-2">
         <div className={`rounded-lg bg-muted p-2 ${accent}`}>{icon}</div>
         <div>
           <p className="text-base font-bold tabular-nums">{value}</p>
@@ -143,8 +143,8 @@ function SummaryCard({ icon, label, value, accent }: SummaryCardProps): React.Re
 
 function StatsCardsSkeleton(): React.ReactElement {
   return (
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_1fr]">
-      <div className="grid grid-cols-1 gap-2">
+    <div className="grid grid-cols-1 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-2 flex items-center gap-2">
@@ -157,7 +157,7 @@ function StatsCardsSkeleton(): React.ReactElement {
           </Card>
         ))}
       </div>
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         {Array.from({ length: 2 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-6 space-y-3">
