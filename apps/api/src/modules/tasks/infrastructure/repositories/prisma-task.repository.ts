@@ -12,9 +12,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class PrismaTaskRepository implements TaskRepository {
-  constructor(
-    @Inject(PrismaService) private readonly prisma: PrismaService,
-  ) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async create(task: TaskEntity): Promise<TaskEntity> {
     const record = await this.prisma.task.create({

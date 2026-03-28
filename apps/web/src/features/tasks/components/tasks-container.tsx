@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import type { CreateTaskDto } from '@task-manager/shared';
 import { Plus } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -12,11 +11,11 @@ import { useTaskFilterStore } from '../store/task-filter.store';
 import { DeleteTaskDialog } from './delete-task-dialog';
 import { EmptyState } from './empty-state';
 import { ErrorFallback } from './error-fallback';
-import { StatsCards } from './stats-cards';
+import { StatsBar } from './stats-bar';
 import { TaskFilters } from './task-filters';
 import { TaskFormDialog } from './task-form-dialog';
-import { TaskList } from './task-list';
-import { TaskListSkeleton } from './task-list-skeleton';
+import { TaskTable } from './task-table';
+import { TaskTableSkeleton } from './task-table-skeleton';
 
 export function TasksContainer(): React.ReactElement {
   // Filter state
@@ -76,41 +75,39 @@ export function TasksContainer(): React.ReactElement {
   }, [deletingTask, deleteTask]);
 
   return (
-    <div className="space-y-6">
-      {/* Stats */}
-      <StatsCards stats={statsQuery.data} isLoading={statsQuery.isLoading} />
+    <div className="space-y-4">
+      {/* Top bar: stats summary */}
+      <StatsBar stats={statsQuery.data} isLoading={statsQuery.isLoading} />
 
-      <Separator />
-
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">Tasks</h2>
-          <p className="text-sm text-muted-foreground">
-            {tasksQuery.data
-              ? `${tasksQuery.data.length} task${tasksQuery.data.length === 1 ? '' : 's'}`
-              : 'Loading...'}
-          </p>
+      {/* Toolbar: title + filters + new task */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-lg font-semibold tracking-tight shrink-0">
+          Tasks
+          {tasksQuery.data && (
+            <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+              ({tasksQuery.data.length})
+            </span>
+          )}
+        </h2>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <TaskFilters />
+          <Button onClick={handleCreateClick} size="sm" className="gap-1.5 w-full sm:w-auto">
+            <Plus className="size-4" />
+            New Task
+          </Button>
         </div>
-        <Button onClick={handleCreateClick} size="sm" className="gap-1.5 w-full sm:w-auto">
-          <Plus className="size-4" />
-          New Task
-        </Button>
       </div>
-
-      {/* Filters */}
-      <TaskFilters />
 
       {/* Content */}
       {tasksQuery.isLoading ? (
-        <TaskListSkeleton />
+        <TaskTableSkeleton />
       ) : tasksQuery.isError ? (
         <ErrorFallback
           message={tasksQuery.error?.message}
           onRetry={() => void tasksQuery.refetch()}
         />
       ) : tasksQuery.data && tasksQuery.data.length > 0 ? (
-        <TaskList tasks={tasksQuery.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+        <TaskTable tasks={tasksQuery.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
       ) : (
         <EmptyState
           hasFilters={hasFilters}

@@ -24,7 +24,10 @@ export const CreateTaskSchema = z.object({
       // Convert local datetime-local string (e.g. 2026-03-28T19:15) to UTC ISO format
       return parsedDate.toISOString();
     },
-    z.string().datetime({ offset: true, message: 'dueDate must be a valid ISO date string' }).optional(),
+    z
+      .string()
+      .datetime({ offset: true, message: 'dueDate must be a valid ISO date string' })
+      .optional(),
   ),
   assignee: z.string().optional(),
 });
