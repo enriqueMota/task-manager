@@ -16,7 +16,7 @@ interface TaskTableSkeletonProps {
 
 export function TaskTableSkeleton({ rows = 5 }: TaskTableSkeletonProps): React.ReactElement {
   return (
-    <div className="rounded-lg border bg-card">
+    <div className="rounded-lg border bg-card text-sm">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
@@ -37,11 +37,21 @@ export function TaskTableSkeleton({ rows = 5 }: TaskTableSkeletonProps): React.R
                   <Skeleton className="h-3 w-1/2" />
                 </div>
               </TableCell>
-              <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
-              <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-              <TableCell><Skeleton className="h-3.5 w-20" /></TableCell>
-              <TableCell><Skeleton className="h-3.5 w-16" /></TableCell>
-              <TableCell><Skeleton className="size-8 rounded-md" /></TableCell>
+              <TableCell>
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-3.5 w-20" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-3.5 w-16" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="size-8 rounded-md" />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -73,22 +73,37 @@ describe('TasksController (integration)', () => {
   describe('GET /tasks', () => {
     it('returns 200 with list of tasks', async () => {
       const task = makeTask();
-      mockListUseCase.execute.mockResolvedValue([task]);
+      mockListUseCase.execute.mockResolvedValue({
+        items: [task],
+        total: 1,
+        page: 1,
+        pageSize: 10,
+      });
 
       const res = await request(app.getHttpServer() as Server).get('/tasks');
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(1);
-      expect((res.body as { id: string }[])[0].id).toBe(TEST_UUID);
+      expect(res.body.items).toHaveLength(1);
+      expect((res.body.items as { id: string }[])[0].id).toBe(TEST_UUID);
     });
 
     it('returns 200 with empty array when no tasks', async () => {
-      mockListUseCase.execute.mockResolvedValue([]);
+      mockListUseCase.execute.mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 1,
+        pageSize: 10,
+      });
 
       const res = await request(app.getHttpServer() as Server).get('/tasks');
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual([]);
+      expect(res.body).toEqual({
+        items: [],
+        total: 0,
+        page: 1,
+        pageSize: 10,
+      });
     });
   });
 

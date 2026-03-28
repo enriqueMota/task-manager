@@ -34,6 +34,7 @@ import {
   toTaskResponseDto,
   toTaskStatsResponseDto,
   type TaskResponseDto,
+  type PaginatedTaskResponseDto,
   type TaskStatsResponseDto,
 } from '../dto/task-response.dto.js';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case.js';
@@ -90,6 +91,8 @@ export class TasksController {
     enum: ['dueDate', 'priority', 'createdAt'],
   })
   @ApiQuery({ name: 'sortDirection', required: false, enum: ['asc', 'desc'] })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200, description: 'List of tasks' })
   async listTasks(
     @Query('status') status?: string,
@@ -97,7 +100,9 @@ export class TasksController {
     @Query('assignee') assignee?: string,
     @Query('sortField') sortField?: string,
     @Query('sortDirection') sortDirection?: string,
-  ): Promise<TaskResponseDto[]> {
+    @Query('page') page = '1',
+    @Query('pageSize') pageSize = '10',
+  ): Promise<PaginatedTaskResponseDto> {
     const filters: TaskFilters = {};
 
     if (status !== undefined) filters.status = status as TaskStatus;
@@ -112,12 +117,19 @@ export class TasksController {
           }
         : undefined;
 
-    const tasks = await this.listTasksUseCase.execute({
+    const paginated = await this.listTasksUseCase.execute({
       filters: Object.keys(filters).length > 0 ? filters : undefined,
       sort,
+      page: Number(page) || 1,
+      pageSize: Number(pageSize) || 10,
     });
 
-    return tasks.map(toTaskResponseDto);
+    return {
+      items: paginated.items.map(toTaskResponseDto),
+      total: paginated.total,
+      page: paginated.page,
+      pageSize: paginated.pageSize,
+    };
   }
 
   @Get(':id')

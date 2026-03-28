@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import type { CreateTaskDto } from '@task-manager/shared';
 import { Plus } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { TaskResponse } from '../api/types';
 import { useCreateTask, useDeleteTask, useUpdateTask } from '../hooks/use-task-mutations';
 import { useTasks, useTaskStats } from '../hooks/use-tasks';
@@ -11,7 +11,7 @@ import { useTaskFilterStore } from '../store/task-filter.store';
 import { DeleteTaskDialog } from './delete-task-dialog';
 import { EmptyState } from './empty-state';
 import { ErrorFallback } from './error-fallback';
-import { StatsBar } from './stats-bar';
+import { StatsCards } from './stats-cards';
 import { TaskFilters } from './task-filters';
 import { TaskFormDialog } from './task-form-dialog';
 import { TaskTable } from './task-table';
@@ -22,9 +22,24 @@ export function TasksContainer(): React.ReactElement {
   const { status, priority, assignee, sortField, sortDirection, clearFilters } =
     useTaskFilterStore();
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   // Queries
-  const tasksQuery = useTasks({ status, priority, assignee, sortField, sortDirection });
+  const tasksQuery = useTasks({
+    status,
+    priority,
+    assignee,
+    sortField,
+    sortDirection,
+    page,
+    pageSize,
+  });
   const statsQuery = useTaskStats();
+
+  const tasks = tasksQuery.data?.items ?? [];
+  const totalTasks = tasksQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalTasks / pageSize));
 
   // Mutations
   const createTask = useCreateTask();
@@ -37,6 +52,10 @@ export function TasksContainer(): React.ReactElement {
   const [deletingTask, setDeletingTask] = useState<TaskResponse | null>(null);
 
   const hasFilters = status !== undefined || priority !== undefined;
+
+  useEffect(() => {
+    setPage(1);
+  }, [status, priority, assignee, sortField, sortDirection]);
 
   // Handlers
   const handleCreateClick = useCallback((): void => {
@@ -75,18 +94,16 @@ export function TasksContainer(): React.ReactElement {
   }, [deletingTask, deleteTask]);
 
   return (
-    <div className="space-y-4">
-      {/* Top bar: stats summary */}
-      <StatsBar stats={statsQuery.data} isLoading={statsQuery.isLoading} />
+    <div className="space-y-6">
+      {/* Stats dashboard */}
+      <StatsCards stats={statsQuery.data} isLoading={statsQuery.isLoading} />
 
       {/* Toolbar: title + filters + new task */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold tracking-tight shrink-0">
           Tasks
           {tasksQuery.data && (
-            <span className="ml-1.5 text-sm font-normal text-muted-foreground">
-              ({tasksQuery.data.length})
-            </span>
+            <span className="ml-1.5 text-sm font-normal text-muted-foreground">({totalTasks})</span>
           )}
         </h2>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -106,8 +123,50 @@ export function TasksContainer(): React.ReactElement {
           message={tasksQuery.error?.message}
           onRetry={() => void tasksQuery.refetch()}
         />
-      ) : tasksQuery.data && tasksQuery.data.length > 0 ? (
-        <TaskTable tasks={tasksQuery.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+      ) : tasks.length > 0 ? (
+        <>
+          <TaskTable tasks={tasks} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mt-3">
+            <p className="text-sm text-muted-foreground">
+              Showing {tasks.length} of {totalTasks} tasks
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page <= 1}
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page >= totalPages}
+                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+              >
+                Next
+              </Button>
+              <select
+                className="h-8 rounded border bg-background px-2 text-sm"
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPage(1);
+                }}
+              >
+                {[5, 10, 20, 50].map((size) => (
+                  <option key={size} value={size}>
+                    {size} / page
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </>
       ) : (
         <EmptyState
           hasFilters={hasFilters}

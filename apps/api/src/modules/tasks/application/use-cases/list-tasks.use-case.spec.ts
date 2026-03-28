@@ -33,29 +33,44 @@ describe('ListTasksUseCase', () => {
 
   it('returns all tasks when no filters provided', async () => {
     const tasks = [makeTask('1'), makeTask('2')];
-    vi.mocked(repo.findAll).mockResolvedValue(tasks);
+    vi.mocked(repo.findAll).mockResolvedValue({
+      items: tasks,
+      total: 2,
+      page: 1,
+      pageSize: 10,
+    });
 
     const result = await useCase.execute({});
 
-    expect(result).toHaveLength(2);
-    expect(repo.findAll).toHaveBeenCalledWith(undefined, undefined);
+    expect(result.items).toHaveLength(2);
+    expect(repo.findAll).toHaveBeenCalledWith(undefined, undefined, { page: 1, pageSize: 10 });
   });
 
   it('passes filters and sort to the repository', async () => {
-    vi.mocked(repo.findAll).mockResolvedValue([]);
+    vi.mocked(repo.findAll).mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: 10,
+    });
     const filters = { status: 'completed' as const };
     const sort = { field: 'createdAt' as const, direction: 'asc' as const };
 
     await useCase.execute({ filters, sort });
 
-    expect(repo.findAll).toHaveBeenCalledWith(filters, sort);
+    expect(repo.findAll).toHaveBeenCalledWith(filters, sort, { page: 1, pageSize: 10 });
   });
 
   it('returns empty array when no tasks exist', async () => {
-    vi.mocked(repo.findAll).mockResolvedValue([]);
+    vi.mocked(repo.findAll).mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: 10,
+    });
 
     const result = await useCase.execute({});
 
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
   });
 });

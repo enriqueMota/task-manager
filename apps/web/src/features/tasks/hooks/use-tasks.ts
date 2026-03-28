@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks.api';
-import type { ListTasksParams, TaskResponse, TaskStatsResponse } from '../api/types';
+import type { ListTasksParams, PaginatedTaskResponse, TaskStatsResponse } from '../api/types';
 import { taskKeys } from './task-keys';
 
 export function useTasks(
   params: ListTasksParams = {},
-): ReturnType<typeof useQuery<TaskResponse[]>> {
+): ReturnType<typeof useQuery<PaginatedTaskResponse>> {
   return useQuery({
     queryKey: taskKeys.list(params),
     queryFn: () => tasksApi.list(params),

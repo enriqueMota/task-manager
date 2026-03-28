@@ -24,4 +24,13 @@ export interface ListTasksParams {
   assignee?: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PaginatedTaskResponse {
+  items: TaskResponse[];
+  total: number;
+  page: number;
+  pageSize: number;
 }

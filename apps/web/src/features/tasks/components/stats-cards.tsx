@@ -20,9 +20,8 @@ export function StatsCards({ stats, isLoading }: StatsCardsProps): React.ReactEl
   if (!stats) return <></>;
 
   return (
-    <div className="space-y-4">
-      {/* Top-level summary */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-2 gap-2">
         <SummaryCard
           icon={<ListTodo className="size-4" />}
           label="Total Tasks"
@@ -48,10 +47,7 @@ export function StatsCards({ stats, isLoading }: StatsCardsProps): React.ReactEl
           accent="text-emerald-600"
         />
       </div>
-
-      {/* Breakdown cards */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
-        {/* By Status */}
+      <div className="space-y-2">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">By Status</CardTitle>
@@ -82,7 +78,6 @@ export function StatsCards({ stats, isLoading }: StatsCardsProps): React.ReactEl
           </CardContent>
         </Card>
 
-        {/* By Priority */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">By Priority</CardTitle>
@@ -135,10 +130,10 @@ interface SummaryCardProps {
 function SummaryCard({ icon, label, value, accent }: SummaryCardProps): React.ReactElement {
   return (
     <Card>
-      <CardContent className="p-4 flex items-center gap-3">
+      <CardContent className="p-3 flex items-center gap-2.5">
         <div className={`rounded-lg bg-muted p-2 ${accent}`}>{icon}</div>
         <div>
-          <p className="text-2xl font-bold tabular-nums">{value}</p>
+          <p className="text-xl font-bold tabular-nums">{value}</p>
           <p className="text-xs text-muted-foreground">{label}</p>
         </div>
       </CardContent>
@@ -148,15 +143,15 @@ function SummaryCard({ icon, label, value, accent }: SummaryCardProps): React.Re
 
 function StatsCardsSkeleton(): React.ReactElement {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
-            <CardContent className="p-4 flex items-center gap-3">
+            <CardContent className="p-3 flex items-center gap-2.5">
               <Skeleton className="size-10 rounded-lg" />
               <div className="space-y-1.5">
-                <Skeleton className="h-6 w-12" />
-                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-5 w-10" />
+                <Skeleton className="h-2.5 w-14" />
               </div>
             </CardContent>
           </Card>

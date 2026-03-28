@@ -20,6 +20,13 @@ export interface TaskStatsResponseDto {
   byPriority: Record<string, number>;
 }
 
+export interface PaginatedTaskResponseDto {
+  items: TaskResponseDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export function toTaskResponseDto(entity: TaskEntity): TaskResponseDto {
   return {
     id: entity.id,

@@ -1,5 +1,10 @@
 import type { CreateTaskDto, UpdateTaskDto } from '@task-manager/shared';
-import type { ListTasksParams, TaskResponse, TaskStatsResponse } from './types';
+import type {
+  ListTasksParams,
+  TaskResponse,
+  TaskStatsResponse,
+  PaginatedTaskResponse,
+} from './types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
@@ -25,13 +30,15 @@ function buildQueryString(params: ListTasksParams): string {
   if (params.assignee) searchParams.set('assignee', params.assignee);
   if (params.sortField) searchParams.set('sortField', params.sortField);
   if (params.sortDirection) searchParams.set('sortDirection', params.sortDirection);
+  if (params.page) searchParams.set('page', String(params.page));
+  if (params.pageSize) searchParams.set('pageSize', String(params.pageSize));
   const qs = searchParams.toString();
   return qs ? `?${qs}` : '';
 }
 
 export const tasksApi = {
-  list: (params: ListTasksParams = {}): Promise<TaskResponse[]> => {
-    return apiFetch<TaskResponse[]>(`/tasks${buildQueryString(params)}`);
+  list: (params: ListTasksParams = {}): Promise<PaginatedTaskResponse> => {
+    return apiFetch<PaginatedTaskResponse>(`/tasks${buildQueryString(params)}`);
   },
 
   getById: (id: string): Promise<TaskResponse> => {

@@ -7,6 +7,7 @@ import type {
   TaskFilters,
   TaskSort,
   TaskStats,
+  PaginatedResult,
 } from '../../domain/repositories/task.repository.interface.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -26,7 +27,11 @@ export class PrismaTaskRepository implements TaskRepository {
     return record ? TaskMapper.toDomain(record) : null;
   }
 
-  async findAll(filters?: TaskFilters, sort?: TaskSort): Promise<TaskEntity[]> {
+  async findAll(
+    filters?: TaskFilters,
+    sort?: TaskSort,
+    pagination?: { page: number; pageSize: number },
+  ): Promise<PaginatedResult<TaskEntity>> {
     const where: Prisma.TaskWhereInput = {};
 
     if (filters?.status !== undefined) where.status = filters.status;
@@ -38,8 +43,26 @@ export class PrismaTaskRepository implements TaskRepository {
       ? { [sort.field]: sort.direction }
       : { createdAt: 'desc' };
 
-    const records = await this.prisma.task.findMany({ where, orderBy });
-    return records.map((r) => TaskMapper.toDomain(r));
+    const page = pagination?.page ?? 1;
+    const pageSize = pagination?.pageSize ?? 10;
+    const offset = (page - 1) * pageSize;
+
+    const [total, records] = await Promise.all([
+      this.prisma.task.count({ where }),
+      this.prisma.task.findMany({
+        where,
+        orderBy,
+        take: pageSize,
+        skip: offset,
+      }),
+    ]);
+
+    return {
+      items: records.map((r) => TaskMapper.toDomain(r)),
+      total,
+      page,
+      pageSize,
+    };
   }
 
   async update(task: TaskEntity): Promise<TaskEntity> {

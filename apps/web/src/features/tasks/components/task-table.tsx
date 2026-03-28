@@ -9,13 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import {
-  Calendar,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  User,
-} from 'lucide-react';
+import { Calendar, MoreHorizontal, Pencil, Trash2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -45,7 +39,9 @@ export function TaskTable({ tasks, onEdit, onDelete }: TaskTableProps): React.Re
             <TableHead className="w-[110px]">Priority</TableHead>
             <TableHead className="w-[120px]">Due Date</TableHead>
             <TableHead className="w-[120px]">Assignee</TableHead>
-            <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
+            <TableHead className="w-[50px]">
+              <span className="sr-only">Actions</span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -54,18 +50,13 @@ export function TaskTable({ tasks, onEdit, onDelete }: TaskTableProps): React.Re
             return (
               <TableRow
                 key={task.id}
-                className={cn(
-                  'cursor-pointer',
-                  overdue && 'bg-red-50/40',
-                )}
+                className={cn('cursor-pointer', overdue && 'bg-red-50/40')}
                 onClick={() => onEdit(task)}
               >
                 {/* Title + description */}
                 <TableCell>
                   <div className="space-y-0.5">
-                    <p className="font-medium text-sm leading-tight line-clamp-1">
-                      {task.title}
-                    </p>
+                    <p className="font-medium text-sm leading-tight line-clamp-1">{task.title}</p>
                     {task.description && (
                       <p className="text-xs text-muted-foreground line-clamp-1">
                         {task.description}
@@ -120,7 +111,7 @@ export function TaskTable({ tasks, onEdit, onDelete }: TaskTableProps): React.Re
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-8"
+                        className="size-7"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <MoreHorizontal className="size-4" />
