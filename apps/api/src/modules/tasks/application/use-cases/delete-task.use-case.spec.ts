@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DeleteTaskUseCase } from './delete-task.use-case.js';
 import { TaskNotFoundException } from './get-task.use-case.js';
 import type { TaskRepository } from '../../domain/repositories/task.repository.interface.js';
-import { TaskEntity } from '../../domain/entities/task.entity.js';
 
 const makeMockRepo = (): TaskRepository => ({
   create: vi.fn(),
@@ -13,16 +12,6 @@ const makeMockRepo = (): TaskRepository => ({
   getStats: vi.fn(),
 });
 
-const makeTask = (): TaskEntity =>
-  new TaskEntity({
-    id: 'uuid-1',
-    title: 'Task to delete',
-    status: 'pending',
-    priority: 'low',
-    createdAt: new Date('2026-01-01'),
-    updatedAt: new Date('2026-01-01'),
-  });
-
 describe('DeleteTaskUseCase', () => {
   let repo: TaskRepository;
   let useCase: DeleteTaskUseCase;
@@ -32,8 +21,7 @@ describe('DeleteTaskUseCase', () => {
     useCase = new DeleteTaskUseCase(repo);
   });
 
-  it('deletes the task when it exists', async () => {
-    vi.mocked(repo.findById).mockResolvedValue(makeTask());
+  it('calls repository.delete with the given id', async () => {
     vi.mocked(repo.delete).mockResolvedValue(undefined);
 
     await useCase.execute({ id: 'uuid-1' });
@@ -42,18 +30,21 @@ describe('DeleteTaskUseCase', () => {
     expect(repo.delete).toHaveBeenCalledOnce();
   });
 
-  it('throws TaskNotFoundException when task does not exist', async () => {
-    vi.mocked(repo.findById).mockResolvedValue(null);
+  it('does not call findById (single-query delete)', async () => {
+    vi.mocked(repo.delete).mockResolvedValue(undefined);
+
+    await useCase.execute({ id: 'uuid-1' });
+
+    expect(repo.findById).not.toHaveBeenCalled();
+  });
+
+  it('propagates TaskNotFoundException from repository', async () => {
+    vi.mocked(repo.delete).mockRejectedValue(
+      new TaskNotFoundException('ghost-id'),
+    );
 
     await expect(useCase.execute({ id: 'ghost-id' })).rejects.toThrow(
       TaskNotFoundException,
     );
-  });
-
-  it('does not call delete when task is not found', async () => {
-    vi.mocked(repo.findById).mockResolvedValue(null);
-
-    await expect(useCase.execute({ id: 'ghost-id' })).rejects.toThrow();
-    expect(repo.delete).not.toHaveBeenCalled();
   });
 });

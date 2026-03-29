@@ -13,6 +13,7 @@ import { GetTaskStatsUseCase } from '../../application/use-cases/get-task-stats.
 import { TaskNotFoundException } from '../../application/use-cases/get-task.use-case.js';
 import { TaskEntity } from '../../domain/entities/task.entity.js';
 import { TASK_REPOSITORY } from '../../domain/repositories/task.repository.interface.js';
+import { DomainExceptionFilter } from '../../../../shared/filters/domain-exception.filter.js';
 
 const TEST_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 
@@ -63,6 +64,7 @@ describe('TasksController (integration)', () => {
     }).compile();
 
     app = module.createNestApplication();
+    app.useGlobalFilters(new DomainExceptionFilter());
     await app.init();
   });
 

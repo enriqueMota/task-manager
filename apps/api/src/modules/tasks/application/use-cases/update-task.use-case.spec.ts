@@ -85,4 +85,34 @@ describe('UpdateTaskUseCase', () => {
       existing.updatedAt.getTime(),
     );
   });
+
+  it('clears optional fields when explicitly set to undefined', async () => {
+    const existing = makeTask({
+      description: 'Should be cleared',
+      assignee: 'Alice',
+    });
+    vi.mocked(repo.findById).mockResolvedValue(existing);
+    vi.mocked(repo.update).mockImplementation((task) => Promise.resolve(task));
+
+    const result = await useCase.execute({
+      id: 'uuid-1',
+      dto: { description: undefined, assignee: undefined },
+    });
+
+    expect(result.description).toBeUndefined();
+    expect(result.assignee).toBeUndefined();
+  });
+
+  it('clears dueDate when explicitly set to undefined', async () => {
+    const existing = makeTask({ dueDate: new Date('2026-06-01') });
+    vi.mocked(repo.findById).mockResolvedValue(existing);
+    vi.mocked(repo.update).mockImplementation((task) => Promise.resolve(task));
+
+    const result = await useCase.execute({
+      id: 'uuid-1',
+      dto: { dueDate: undefined },
+    });
+
+    expect(result.dueDate).toBeUndefined();
+  });
 });

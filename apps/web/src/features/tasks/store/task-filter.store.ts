@@ -1,8 +1,5 @@
-import type { TaskPriority, TaskStatus } from '@task-manager/shared';
+import type { SortField, SortDirection, TaskPriority, TaskStatus } from '@task-manager/shared';
 import { create } from 'zustand';
-
-export type SortField = 'title' | 'priority' | 'status' | 'dueDate' | 'createdAt';
-export type SortDirection = 'asc' | 'desc';
 
 export interface TaskFilterState {
   status?: TaskStatus;

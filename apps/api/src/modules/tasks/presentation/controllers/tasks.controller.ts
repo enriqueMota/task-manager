@@ -10,7 +10,6 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -25,11 +24,15 @@ import {
   CreateTaskSchema,
   UpdateTaskSchema,
   TaskIdSchema,
+  ListTasksQuerySchema,
   TASK_STATUS_VALUES,
   TASK_PRIORITY_VALUES,
+  SORT_FIELD_VALUES,
+  SORT_DIRECTION_VALUES,
   type CreateTaskDto,
   type UpdateTaskDto,
   type TaskIdDto,
+  type ListTasksQueryDto,
 } from '@task-manager/shared';
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe.js';
 import {
@@ -46,10 +49,7 @@ import {
 } from '../dto/task-response.dto.js';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case.js';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case.js';
-import {
-  GetTaskUseCase,
-  TaskNotFoundException,
-} from '../../application/use-cases/get-task.use-case.js';
+import { GetTaskUseCase } from '../../application/use-cases/get-task.use-case.js';
 import { UpdateTaskUseCase } from '../../application/use-cases/update-task.use-case.js';
 import { DeleteTaskUseCase } from '../../application/use-cases/delete-task.use-case.js';
 import { GetTaskStatsUseCase } from '../../application/use-cases/get-task-stats.use-case.js';
@@ -57,7 +57,6 @@ import type {
   TaskFilters,
   TaskSort,
 } from '../../domain/repositories/task.repository.interface.js';
-import type { TaskStatus, TaskPriority } from '@task-manager/shared';
 
 @ApiTags('tasks')
 @ApiExtraModels(
@@ -149,14 +148,14 @@ export class TasksController {
   @ApiQuery({
     name: 'sortField',
     required: false,
-    enum: ['dueDate', 'priority', 'createdAt'],
+    enum: SORT_FIELD_VALUES,
     description: 'Field to sort results by',
     example: 'createdAt',
   })
   @ApiQuery({
     name: 'sortDirection',
     required: false,
-    enum: ['asc', 'desc'],
+    enum: SORT_DIRECTION_VALUES,
     description: 'Sort direction (ascending or descending)',
     example: 'desc',
   })
@@ -173,7 +172,7 @@ export class TasksController {
     required: false,
     type: Number,
     description:
-      'Number of items per page. Defaults to 10. Max recommended: 100.',
+      'Number of items per page. Defaults to 10. Maximum: 100.',
     example: 10,
     schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
   })
@@ -184,38 +183,37 @@ export class TasksController {
     type: PaginatedTaskResponseDto,
   })
   @ApiResponse({
+    status: 400,
+    description: 'Validation error — invalid query parameters.',
+    type: ValidationErrorResponseDto,
+  })
+  @ApiResponse({
     status: 500,
     description: 'Internal server error',
     type: InternalServerErrorResponseDto,
   })
   async listTasks(
-    @Query('status') status?: string,
-    @Query('priority') priority?: string,
-    @Query('assignee') assignee?: string,
-    @Query('sortField') sortField?: string,
-    @Query('sortDirection') sortDirection?: string,
-    @Query('page') page = '1',
-    @Query('pageSize') pageSize = '10',
+    @Query(new ZodValidationPipe(ListTasksQuerySchema)) query: ListTasksQueryDto,
   ): Promise<PaginatedTaskResponseDto> {
     const filters: TaskFilters = {};
 
-    if (status !== undefined) filters.status = status as TaskStatus;
-    if (priority !== undefined) filters.priority = priority as TaskPriority;
-    if (assignee !== undefined) filters.assignee = assignee;
+    if (query.status !== undefined) filters.status = query.status;
+    if (query.priority !== undefined) filters.priority = query.priority;
+    if (query.assignee !== undefined) filters.assignee = query.assignee;
 
     const sort: TaskSort | undefined =
-      sortField !== undefined
+      query.sortField !== undefined
         ? {
-            field: sortField as TaskSort['field'],
-            direction: (sortDirection ?? 'asc') as TaskSort['direction'],
+            field: query.sortField,
+            direction: query.sortDirection ?? 'asc',
           }
         : undefined;
 
     const paginated = await this.listTasksUseCase.execute({
       filters: Object.keys(filters).length > 0 ? filters : undefined,
       sort,
-      page: Number(page) || 1,
-      pageSize: Number(pageSize) || 10,
+      page: query.page,
+      pageSize: query.pageSize,
     });
 
     return {
@@ -261,15 +259,8 @@ export class TasksController {
     @Param('id', new ZodValidationPipe(TaskIdSchema.shape.id))
     id: TaskIdDto['id'],
   ): Promise<TaskResponseDto> {
-    try {
-      const task = await this.getTaskUseCase.execute({ id });
-      return toTaskResponseDto(task);
-    } catch (error) {
-      if (error instanceof TaskNotFoundException) {
-        throw new NotFoundException(error.message);
-      }
-      throw error;
-    }
+    const task = await this.getTaskUseCase.execute({ id });
+    return toTaskResponseDto(task);
   }
 
   // ─── Create Task ────────────────────────────────────────────────────────
@@ -414,15 +405,8 @@ export class TasksController {
     id: TaskIdDto['id'],
     @Body(new ZodValidationPipe(UpdateTaskSchema)) dto: UpdateTaskDto,
   ): Promise<TaskResponseDto> {
-    try {
-      const task = await this.updateTaskUseCase.execute({ id, dto });
-      return toTaskResponseDto(task);
-    } catch (error) {
-      if (error instanceof TaskNotFoundException) {
-        throw new NotFoundException(error.message);
-      }
-      throw error;
-    }
+    const task = await this.updateTaskUseCase.execute({ id, dto });
+    return toTaskResponseDto(task);
   }
 
   // ─── Delete Task ────────────────────────────────────────────────────────
@@ -461,13 +445,6 @@ export class TasksController {
     @Param('id', new ZodValidationPipe(TaskIdSchema.shape.id))
     id: TaskIdDto['id'],
   ): Promise<void> {
-    try {
-      await this.deleteTaskUseCase.execute({ id });
-    } catch (error) {
-      if (error instanceof TaskNotFoundException) {
-        throw new NotFoundException(error.message);
-      }
-      throw error;
-    }
+    await this.deleteTaskUseCase.execute({ id });
   }
 }

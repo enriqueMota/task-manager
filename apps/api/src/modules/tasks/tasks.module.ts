@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from './infrastructure/prisma/prisma.service.js';
 import { PrismaTaskRepository } from './infrastructure/repositories/prisma-task.repository.js';
 import { TASK_REPOSITORY } from './domain/repositories/task.repository.interface.js';
 import { CreateTaskUseCase } from './application/use-cases/create-task.use-case.js';
@@ -13,7 +12,6 @@ import { TasksController } from './presentation/controllers/tasks.controller.js'
 @Module({
   controllers: [TasksController],
   providers: [
-    PrismaService,
     {
       provide: TASK_REPOSITORY,
       useClass: PrismaTaskRepository,

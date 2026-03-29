@@ -2,11 +2,16 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { DomainExceptionFilter } from './shared/filters/domain-exception.filter.js';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  app.enableCors({
+    origin: process.env['CORS_ORIGIN'] ?? 'http://localhost:3001',
+  });
+
+  app.useGlobalFilters(new DomainExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Task Manager API')
@@ -41,6 +46,7 @@ Built with **NestJS** following Clean Architecture principles with vertical feat
       'Endpoints for managing tasks (CRUD, filtering, sorting, pagination)',
     )
     .addTag('statistics', 'Endpoints for task analytics and aggregated metrics')
+    .addTag('health', 'Health check endpoint')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

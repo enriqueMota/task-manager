@@ -27,10 +27,10 @@ Built as an AI-assisted development exercise using GitHub Copilot with strict ar
 ┌─────────────────────────────────────────────────────────┐
 │                      Monorepo (pnpm)                    │
 │                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
 │  │   apps/api   │  │   apps/web   │  │packages/shared│  │
 │  │   (NestJS)   │  │  (Next.js)   │  │ (Zod schemas) │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘   │
 │         │                 │                  │          │
 │         └─────────────────┴──────────────────┘          │
 │                     shared types,                       │
@@ -41,15 +41,18 @@ Built as an AI-assisted development exercise using GitHub Copilot with strict ar
 ### Backend Clean Architecture (apps/api)
 
 ```
-modules/tasks/
-├── domain/            → Pure business models (TaskEntity, repository interface)
-│                        Zero framework dependencies
-├── application/       → Use-cases with single execute() method
-│                        Depends only on domain interfaces
-├── infrastructure/    → Prisma repository, DB mappers, PrismaService
-│                        Implements domain interfaces
-└── presentation/      → NestJS controllers, DTOs, Zod validation pipes
-                         No business logic — delegates to use-cases
+src/
+├── shared/            → Global infrastructure (DatabaseModule, PrismaService,
+│                        DomainExceptionFilter, HealthController)
+└── modules/tasks/
+    ├── domain/            → Pure business models (TaskEntity, repository interface)
+    │                        Zero framework dependencies
+    ├── application/       → Use-cases with single execute() method
+    │                        Depends only on domain interfaces
+    ├── infrastructure/    → Prisma repository, DB mappers
+    │                        Implements domain interfaces
+    └── presentation/      → NestJS controllers, DTOs, Zod validation pipes
+                             No business logic — delegates to use-cases
 ```
 
 Each layer has strict import boundaries:
@@ -96,7 +99,7 @@ State management is split by responsibility:
 | Testing          | Vitest + Testing Library                   | 4.1.2        |
 | API Docs         | Swagger (via @nestjs/swagger)              | 11.x         |
 | Package Manager  | pnpm (workspaces)                          | 10.x         |
-| Containerization | Docker Compose                             | 3.8          |
+| Containerization | Docker Compose                             | v2           |
 
 ---
 
@@ -104,6 +107,8 @@ State management is split by responsibility:
 
 ```
 task-manager/
+├── .agents/
+│   └── skills/                     # Custom AI skills (e.g., frontend-design)
 ├── .github/
 │   └── copilot-instructions.md     # AI agent architectural contract
 ├── apps/
@@ -111,12 +116,16 @@ task-manager/
 │   │   ├── prisma/
 │   │   │   └── schema.prisma       # DB schema with indexes
 │   │   ├── src/
-│   │   │   ├── main.ts             # Bootstrap + Swagger setup
+│   │   │   ├── main.ts             # Bootstrap + Swagger + global filters
 │   │   │   ├── app.module.ts       # Root module
+│   │   │   ├── shared/             # Global infrastructure
+│   │   │   │   ├── database/       # DatabaseModule + PrismaService
+│   │   │   │   ├── filters/        # Global DomainExceptionFilter
+│   │   │   │   └── health/         # Health check controller
 │   │   │   └── modules/tasks/      # Task feature module
 │   │   │       ├── domain/         # Entity + repository interface
 │   │   │       ├── application/    # Use-cases + unit tests
-│   │   │       ├── infrastructure/ # Prisma repo, mappers, service
+│   │   │       ├── infrastructure/ # Prisma repo, mappers
 │   │   │       └── presentation/   # Controller, DTOs, pipes
 │   │   └── vitest.config.ts
 │   └── web/                        # Next.js frontend
@@ -141,6 +150,7 @@ task-manager/
 │           ├── task-priority.ts    # TaskPriority enum
 │           ├── task.schema.ts      # Zod validation schemas
 │           └── index.ts            # Barrel exports
+├── AI_REFLECTION.md                # Lessons learned from AI collaboration
 ├── AI_TASKS.md                     # 50-task phased build checklist
 ├── pnpm-workspace.yaml
 └── package.json                    # Root scripts
@@ -336,7 +346,7 @@ pnpm test
 ### Run by App
 
 ```bash
-pnpm test:api    # 30 backend tests
+pnpm test:api    # 31 backend tests
 pnpm test:web    # 30 frontend tests
 ```
 
@@ -351,12 +361,12 @@ cd apps/web && pnpm test:cov
 
 | Layer               | Type        | Tool                     | Count  |
 | ------------------- | ----------- | ------------------------ | ------ |
-| Use-cases           | Unit        | Vitest                   | 24     |
-| Controller          | Integration | Vitest + supertest       | 6      |
+| Use-cases           | Unit        | Vitest                   | 20     |
+| Controller          | Integration | Vitest + supertest       | 11     |
 | Form validation     | Unit        | Vitest + Testing Library | 11     |
 | Component rendering | Unit        | Vitest + Testing Library | 13     |
 | Zustand store       | Unit        | Vitest                   | 6      |
-| **Total**           |             |                          | **60** |
+| **Total**           |             |                          | **61** |
 
 Backend tests mock repository interfaces — never Prisma directly — ensuring tests validate business logic isolation.
 
@@ -473,13 +483,13 @@ Each task had preconditions: code must compile, lint must pass, tests must pass 
 | Decision                       | Trade-off                          | Rationale                                                                                                                                                                                                       |
 | ------------------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **PUT with partial schema**    | Not strict PUT semantics           | Meets spec requirement for PUT while allowing partial updates via `CreateTaskSchema.partial()` — practical for task editing                                                                                     |
-| **No pagination**              | Full list fetched every time       | Scope decision — acceptable for a task manager with moderate data; pagination would add complexity to both API and frontend                                                                                     |
+| **Pagination without infinite scroll** | Extra UI for page controls  | Server-side pagination with page/pageSize is implemented; infinite scroll would improve UX but adds frontend complexity                                                                                         |
 | **Prisma as ORM**              | Query builder abstraction overhead | Prisma's type-safe queries and auto-generated client outweigh raw SQL flexibility for this use case                                                                                                             |
 | **String enums in DB**         | Not using PostgreSQL native enums  | Prisma string fields with Zod validation at the application boundary; avoids migration pain when adding enum values                                                                                             |
 | **No authentication**          | No user isolation                  | Out of scope for this exercise; the `assignee` field is free text                                                                                                                                               |
 | **standardSchemaResolver**     | Newer, less documented             | Forward-compatible with Zod v4 Standard Schema spec; required discovering the correct import path during development                                                                                            |
 | **Server Components not used** | All components are client-side     | Task management requires heavy interactivity (forms, filters, dialogs) — Server Components would add complexity without meaningful benefit here                                                                 |
-| **60 tests, no E2E**           | No browser-based integration tests | Unit + integration tests cover business logic and component behavior; E2E (Playwright/Cypress) would be the next step for a production app                                                                      |
+| **61 tests, no E2E**           | No browser-based integration tests | Unit + integration tests cover business logic and component behavior; E2E (Playwright/Cypress) would be the next step for a production app                                                                      |
 | **tsx for dev mode**           | Not using Nest CLI compiler        | `nest start --watch` fails with `module: "nodenext"` + monorepo path aliases; tsx runs TypeScript directly via esbuild, requiring explicit `@Inject()` decorators since esbuild doesn't emit decorator metadata |
 
 ---

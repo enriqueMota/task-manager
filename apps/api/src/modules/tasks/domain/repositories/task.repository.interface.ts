@@ -1,5 +1,5 @@
 import type { TaskEntity } from '../entities/task.entity.js';
-import type { TaskPriority, TaskStatus } from '@task-manager/shared';
+import type { TaskPriority, TaskStatus, SortField, SortDirection } from '@task-manager/shared';
 
 export interface TaskFilters {
   status?: TaskStatus;
@@ -8,8 +8,8 @@ export interface TaskFilters {
 }
 
 export interface TaskSort {
-  field: 'dueDate' | 'priority' | 'createdAt';
-  direction: 'asc' | 'desc';
+  field: SortField;
+  direction: SortDirection;
 }
 
 export interface PaginationParams {

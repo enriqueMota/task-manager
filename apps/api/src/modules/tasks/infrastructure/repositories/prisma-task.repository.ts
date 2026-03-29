@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { TaskNotFoundException } from '../../application/use-cases/get-task.use-case.js';
 import type { Prisma } from '../../../../generated/prisma/index.js';
 import { TaskMapper } from '../mappers/task.mapper.js';
 import { TaskEntity } from '../../domain/entities/task.entity.js';
@@ -9,7 +10,7 @@ import type {
   TaskStats,
   PaginatedResult,
 } from '../../domain/repositories/task.repository.interface.js';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { PrismaService } from '../../../../shared/database/prisma.service.js';
 
 @Injectable()
 export class PrismaTaskRepository implements TaskRepository {
@@ -74,7 +75,18 @@ export class PrismaTaskRepository implements TaskRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.task.delete({ where: { id } });
+    try {
+      await this.prisma.task.delete({ where: { id } });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        (error as { code: string }).code === 'P2025'
+      ) {
+        throw new TaskNotFoundException(id);
+      }
+      throw error;
+    }
   }
 
   async getStats(): Promise<TaskStats> {

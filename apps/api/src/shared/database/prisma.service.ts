@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '../../../../generated/prisma/index.js';
+import { PrismaClient } from '../../generated/prisma/index.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
@@ -8,9 +8,14 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    const adapter = new PrismaPg({
-      connectionString: process.env['DATABASE_URL']!,
-    });
+    const connectionString = process.env['DATABASE_URL'];
+    if (!connectionString) {
+      throw new Error(
+        'DATABASE_URL environment variable is not set. ' +
+          'Create apps/api/.env with DATABASE_URL="postgresql://..."',
+      );
+    }
+    const adapter = new PrismaPg({ connectionString });
     super({ adapter });
   }
 
