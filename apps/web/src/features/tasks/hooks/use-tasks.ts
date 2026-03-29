@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks.api';
-import type { ListTasksParams, PaginatedTaskResponse, TaskResponse, TaskStatsResponse } from '../api/types';
+import type {
+  ListTasksParams,
+  PaginatedTaskResponse,
+  TaskResponse,
+  TaskStatsResponse,
+} from '../api/types';
 import { taskKeys } from './task-keys';
 
 export function useTasks(params: ListTasksParams = {}) {

@@ -16,6 +16,7 @@ import { CreateTaskSchema, TASK_PRIORITY_VALUES, TASK_STATUS_VALUES } from '@tas
 import type { CreateTaskDto } from '@task-manager/shared';
 import { Loader2 } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { PRIORITY_CONFIG, STATUS_CONFIG } from '../lib/task-display';
 
 interface TaskFormProps {
@@ -39,7 +40,7 @@ export function TaskForm({
     control,
     formState: { errors },
   } = useForm<CreateTaskDto>({
-    resolver: standardSchemaResolver(CreateTaskSchema),
+    resolver: standardSchemaResolver(CreateTaskSchema) as Resolver<CreateTaskDto>,
     defaultValues: {
       title: '',
       description: '',
