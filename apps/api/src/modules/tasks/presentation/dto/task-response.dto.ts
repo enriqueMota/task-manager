@@ -1,29 +1,45 @@
+import { ApiProperty } from '@nestjs/swagger';
 import type { TaskStatus, TaskPriority } from '@task-manager/shared';
 import type { TaskEntity } from '../../domain/entities/task.entity.js';
 import type { TaskStats } from '../../domain/repositories/task.repository.interface.js';
 
-export interface TaskResponseDto {
+export class TaskResponseDto {
   id: string;
+  @ApiProperty()
   title: string;
+  @ApiProperty({ required: false })
   description?: string;
+  @ApiProperty({ enum: ['pending', 'in-progress', 'completed'] })
   status: TaskStatus;
+  @ApiProperty({ enum: ['low', 'medium', 'high'] })
   priority: TaskPriority;
+  @ApiProperty({ required: false, nullable: true })
   dueDate?: string;
+  @ApiProperty({ required: false })
   assignee?: string;
+  @ApiProperty()
   createdAt: string;
+  @ApiProperty()
   updatedAt: string;
 }
 
-export interface TaskStatsResponseDto {
+export class TaskStatsResponseDto {
+  @ApiProperty()
   total: number;
+  @ApiProperty({ type: Object, additionalProperties: { type: 'number' } })
   byStatus: Record<string, number>;
+  @ApiProperty({ type: Object, additionalProperties: { type: 'number' } })
   byPriority: Record<string, number>;
 }
 
-export interface PaginatedTaskResponseDto {
+export class PaginatedTaskResponseDto {
+  @ApiProperty({ type: [TaskResponseDto] })
   items: TaskResponseDto[];
+  @ApiProperty()
   total: number;
+  @ApiProperty()
   page: number;
+  @ApiProperty()
   pageSize: number;
 }
 

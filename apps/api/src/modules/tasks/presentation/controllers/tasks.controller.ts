@@ -16,6 +16,7 @@ import {
   ApiTags,
   ApiOperation,
   ApiResponse,
+  ApiBody,
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
@@ -33,9 +34,9 @@ import { ZodValidationPipe } from '../pipes/zod-validation.pipe.js';
 import {
   toTaskResponseDto,
   toTaskStatsResponseDto,
-  type TaskResponseDto,
-  type PaginatedTaskResponseDto,
-  type TaskStatsResponseDto,
+  TaskResponseDto,
+  PaginatedTaskResponseDto,
+  TaskStatsResponseDto,
 } from '../dto/task-response.dto.js';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case.js';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case.js';
@@ -74,7 +75,24 @@ export class TasksController {
   @ApiOperation({
     summary: 'Get task statistics grouped by status and priority',
   })
-  @ApiResponse({ status: 200, description: 'Task statistics' })
+  @ApiResponse({
+    status: 200,
+    description: 'Task statistics',
+    schema: {
+      type: 'object',
+      properties: {
+        total: { type: 'number' },
+        byStatus: {
+          type: 'object',
+          additionalProperties: { type: 'number' },
+        },
+        byPriority: {
+          type: 'object',
+          additionalProperties: { type: 'number' },
+        },
+      },
+    },
+  })
   async getStats(): Promise<TaskStatsResponseDto> {
     const stats = await this.getTaskStatsUseCase.execute();
     return toTaskStatsResponseDto(stats);
@@ -93,7 +111,38 @@ export class TasksController {
   @ApiQuery({ name: 'sortDirection', required: false, enum: ['asc', 'desc'] })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'pageSize', required: false, type: Number, example: 10 })
-  @ApiResponse({ status: 200, description: 'List of tasks' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of tasks',
+    schema: {
+      type: 'object',
+      properties: {
+        items: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              title: { type: 'string' },
+              description: { type: 'string', nullable: true },
+              status: {
+                type: 'string',
+                enum: ['pending', 'in-progress', 'completed'],
+              },
+              priority: { type: 'string', enum: ['low', 'medium', 'high'] },
+              dueDate: { type: 'string', nullable: true },
+              assignee: { type: 'string', nullable: true },
+              createdAt: { type: 'string' },
+              updatedAt: { type: 'string' },
+            },
+          },
+        },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        pageSize: { type: 'number' },
+      },
+    },
+  })
   async listTasks(
     @Query('status') status?: string,
     @Query('priority') priority?: string,
@@ -155,6 +204,45 @@ export class TasksController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new task' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: 'Finish report' },
+        description: {
+          type: 'string',
+          example: 'Summarize Q1 metrics',
+          nullable: true,
+        },
+        status: {
+          type: 'string',
+          enum: ['pending', 'in-progress', 'completed'],
+          example: 'pending',
+        },
+        priority: {
+          type: 'string',
+          enum: ['low', 'medium', 'high'],
+          example: 'medium',
+        },
+        dueDate: {
+          type: 'string',
+          format: 'date-time',
+          example: '2026-04-01T15:00:00.000Z',
+          nullable: true,
+        },
+        assignee: { type: 'string', example: 'John Doe', nullable: true },
+      },
+      required: ['title', 'status', 'priority'],
+      example: {
+        title: 'Finish report',
+        description: 'Summarize Q1 metrics',
+        status: 'pending',
+        priority: 'medium',
+        dueDate: '2026-04-01T15:00:00.000Z',
+        assignee: 'John Doe',
+      },
+    },
+  })
   @ApiResponse({ status: 201, description: 'Task created' })
   @ApiResponse({ status: 400, description: 'Validation error' })
   async createTask(
@@ -166,6 +254,45 @@ export class TasksController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update an existing task' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: 'Finish report' },
+        description: {
+          type: 'string',
+          example: 'Summarize Q1 metrics',
+          nullable: true,
+        },
+        status: {
+          type: 'string',
+          enum: ['pending', 'in-progress', 'completed'],
+          example: 'in-progress',
+        },
+        priority: {
+          type: 'string',
+          enum: ['low', 'medium', 'high'],
+          example: 'high',
+        },
+        dueDate: {
+          type: 'string',
+          format: 'date-time',
+          example: '2026-04-05T18:00:00.000Z',
+          nullable: true,
+        },
+        assignee: { type: 'string', example: 'Jane Doe', nullable: true },
+      },
+      required: ['title', 'status', 'priority'],
+      example: {
+        title: 'Finish report',
+        description: 'Summarize Q1 metrics',
+        status: 'in-progress',
+        priority: 'high',
+        dueDate: '2026-04-05T18:00:00.000Z',
+        assignee: 'Jane Doe',
+      },
+    },
+  })
   @ApiParam({ name: 'id', description: 'Task UUID' })
   @ApiResponse({ status: 200, description: 'Task updated' })
   @ApiResponse({ status: 400, description: 'Validation error' })
