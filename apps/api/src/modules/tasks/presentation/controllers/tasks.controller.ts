@@ -19,6 +19,7 @@ import {
   ApiBody,
   ApiParam,
   ApiQuery,
+  ApiExtraModels,
 } from '@nestjs/swagger';
 import {
   CreateTaskSchema,
@@ -37,6 +38,11 @@ import {
   TaskResponseDto,
   PaginatedTaskResponseDto,
   TaskStatsResponseDto,
+  CreateTaskRequestDto,
+  UpdateTaskRequestDto,
+  ValidationErrorResponseDto,
+  NotFoundErrorResponseDto,
+  InternalServerErrorResponseDto,
 } from '../dto/task-response.dto.js';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case.js';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case.js';
@@ -54,6 +60,16 @@ import type {
 import type { TaskStatus, TaskPriority } from '@task-manager/shared';
 
 @ApiTags('tasks')
+@ApiExtraModels(
+  TaskResponseDto,
+  PaginatedTaskResponseDto,
+  TaskStatsResponseDto,
+  CreateTaskRequestDto,
+  UpdateTaskRequestDto,
+  ValidationErrorResponseDto,
+  NotFoundErrorResponseDto,
+  InternalServerErrorResponseDto,
+)
 @Controller('tasks')
 export class TasksController {
   constructor(
@@ -71,77 +87,106 @@ export class TasksController {
     private readonly getTaskStatsUseCase: GetTaskStatsUseCase,
   ) {}
 
+  // ─── Statistics ──────────────────────────────────────────────────────────
+
   @Get('stats')
+  @ApiTags('statistics')
   @ApiOperation({
-    summary: 'Get task statistics grouped by status and priority',
+    summary: 'Get task statistics',
+    description:
+      'Returns aggregated statistics for all tasks, grouped by **status** and **priority**. ' +
+      'Counts are computed at the database level for optimal performance.',
+    operationId: 'getTaskStats',
   })
   @ApiResponse({
     status: 200,
-    description: 'Task statistics',
-    schema: {
-      type: 'object',
-      properties: {
-        total: { type: 'number' },
-        byStatus: {
-          type: 'object',
-          additionalProperties: { type: 'number' },
-        },
-        byPriority: {
-          type: 'object',
-          additionalProperties: { type: 'number' },
-        },
-      },
-    },
+    description:
+      'Aggregated task statistics with total count and breakdowns by status and priority.',
+    type: TaskStatsResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: InternalServerErrorResponseDto,
   })
   async getStats(): Promise<TaskStatsResponseDto> {
     const stats = await this.getTaskStatsUseCase.execute();
     return toTaskStatsResponseDto(stats);
   }
 
+  // ─── List Tasks ──────────────────────────────────────────────────────────
+
   @Get()
-  @ApiOperation({ summary: 'List tasks with optional filters and sorting' })
-  @ApiQuery({ name: 'status', required: false, enum: TASK_STATUS_VALUES })
-  @ApiQuery({ name: 'priority', required: false, enum: TASK_PRIORITY_VALUES })
-  @ApiQuery({ name: 'assignee', required: false, type: String })
+  @ApiOperation({
+    summary: 'List tasks',
+    description:
+      'Returns a **paginated** list of tasks with optional filtering by status, priority, ' +
+      'and assignee, plus sorting by due date, priority, or creation date. ' +
+      'Results include pagination metadata **(total, page, pageSize)**.',
+    operationId: 'listTasks',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: TASK_STATUS_VALUES,
+    description: 'Filter tasks by their current status',
+    example: 'pending',
+  })
+  @ApiQuery({
+    name: 'priority',
+    required: false,
+    enum: TASK_PRIORITY_VALUES,
+    description: 'Filter tasks by their priority level',
+    example: 'high',
+  })
+  @ApiQuery({
+    name: 'assignee',
+    required: false,
+    type: String,
+    description: 'Filter tasks by assignee name (exact match)',
+    example: 'John Doe',
+  })
   @ApiQuery({
     name: 'sortField',
     required: false,
     enum: ['dueDate', 'priority', 'createdAt'],
+    description: 'Field to sort results by',
+    example: 'createdAt',
   })
-  @ApiQuery({ name: 'sortDirection', required: false, enum: ['asc', 'desc'] })
-  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
-  @ApiQuery({ name: 'pageSize', required: false, type: Number, example: 10 })
+  @ApiQuery({
+    name: 'sortDirection',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort direction (ascending or descending)',
+    example: 'desc',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-indexed). Defaults to 1.',
+    example: 1,
+    schema: { type: 'integer', minimum: 1, default: 1 },
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description:
+      'Number of items per page. Defaults to 10. Max recommended: 100.',
+    example: 10,
+    schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of tasks',
-    schema: {
-      type: 'object',
-      properties: {
-        items: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              title: { type: 'string' },
-              description: { type: 'string', nullable: true },
-              status: {
-                type: 'string',
-                enum: ['pending', 'in-progress', 'completed'],
-              },
-              priority: { type: 'string', enum: ['low', 'medium', 'high'] },
-              dueDate: { type: 'string', nullable: true },
-              assignee: { type: 'string', nullable: true },
-              createdAt: { type: 'string' },
-              updatedAt: { type: 'string' },
-            },
-          },
-        },
-        total: { type: 'number' },
-        page: { type: 'number' },
-        pageSize: { type: 'number' },
-      },
-    },
+    description:
+      'Paginated list of tasks matching the provided filters and sort criteria.',
+    type: PaginatedTaskResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: InternalServerErrorResponseDto,
   })
   async listTasks(
     @Query('status') status?: string,
@@ -181,11 +226,37 @@ export class TasksController {
     };
   }
 
+  // ─── Get Single Task ────────────────────────────────────────────────────
+
   @Get(':id')
-  @ApiOperation({ summary: 'Get a single task by ID' })
-  @ApiParam({ name: 'id', description: 'Task UUID' })
-  @ApiResponse({ status: 200, description: 'Task found' })
-  @ApiResponse({ status: 404, description: 'Task not found' })
+  @ApiOperation({
+    summary: 'Get a task by ID',
+    description:
+      'Retrieves a single task by its unique UUID identifier. ' +
+      'Returns 404 if no task exists with the given ID.',
+    operationId: 'getTask',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique UUID identifier of the task',
+    format: 'uuid',
+    example: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The task matching the provided ID.',
+    type: TaskResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No task found with the provided ID.',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: InternalServerErrorResponseDto,
+  })
   async getTask(
     @Param('id', new ZodValidationPipe(TaskIdSchema.shape.id))
     id: TaskIdDto['id'],
@@ -201,50 +272,64 @@ export class TasksController {
     }
   }
 
+  // ─── Create Task ────────────────────────────────────────────────────────
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new task' })
+  @ApiOperation({
+    summary: 'Create a new task',
+    description:
+      'Creates a new task with the provided details. ' +
+      'The `title`, `status`, and `priority` fields are **required**. ' +
+      'All fields are validated using Zod schemas — invalid requests return ' +
+      'structured per-field error messages.',
+    operationId: 'createTask',
+  })
   @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'Finish report' },
-        description: {
-          type: 'string',
-          example: 'Summarize Q1 metrics',
-          nullable: true,
+    description: 'Task creation payload',
+    type: CreateTaskRequestDto,
+    examples: {
+      minimal: {
+        summary: 'Minimal task (required fields only)',
+        description: 'Creates a task with only the required fields',
+        value: {
+          title: 'Review pull request',
+          status: 'pending',
+          priority: 'medium',
         },
-        status: {
-          type: 'string',
-          enum: ['pending', 'in-progress', 'completed'],
-          example: 'pending',
-        },
-        priority: {
-          type: 'string',
-          enum: ['low', 'medium', 'high'],
-          example: 'medium',
-        },
-        dueDate: {
-          type: 'string',
-          format: 'date-time',
-          example: '2026-04-01T15:00:00.000Z',
-          nullable: true,
-        },
-        assignee: { type: 'string', example: 'John Doe', nullable: true },
       },
-      required: ['title', 'status', 'priority'],
-      example: {
-        title: 'Finish report',
-        description: 'Summarize Q1 metrics',
-        status: 'pending',
-        priority: 'medium',
-        dueDate: '2026-04-01T15:00:00.000Z',
-        assignee: 'John Doe',
+      complete: {
+        summary: 'Complete task (all fields)',
+        description:
+          'Creates a task with all available fields including optional ones',
+        value: {
+          title: 'Finish quarterly report',
+          description:
+            'Summarize Q1 metrics and prepare charts for the board meeting',
+          status: 'pending',
+          priority: 'high',
+          dueDate: '2026-04-01T15:00:00.000Z',
+          assignee: 'John Doe',
+        },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Task created' })
-  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({
+    status: 201,
+    description: 'Task successfully created. Returns the full task object.',
+    type: TaskResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Validation error — one or more fields failed schema validation.',
+    type: ValidationErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: InternalServerErrorResponseDto,
+  })
   async createTask(
     @Body(new ZodValidationPipe(CreateTaskSchema)) dto: CreateTaskDto,
   ): Promise<TaskResponseDto> {
@@ -252,51 +337,78 @@ export class TasksController {
     return toTaskResponseDto(task);
   }
 
+  // ─── Update Task ────────────────────────────────────────────────────────
+
   @Put(':id')
-  @ApiOperation({ summary: 'Update an existing task' })
+  @ApiOperation({
+    summary: 'Update an existing task',
+    description:
+      'Updates an existing task identified by UUID. All fields are **optional** — ' +
+      'only the provided fields will be updated (partial update). ' +
+      'Returns 404 if the task does not exist.',
+    operationId: 'updateTask',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique UUID identifier of the task to update',
+    format: 'uuid',
+    example: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  })
   @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: 'Finish report' },
-        description: {
-          type: 'string',
-          example: 'Summarize Q1 metrics',
-          nullable: true,
+    description:
+      'Partial task update payload — include only the fields you want to change',
+    type: UpdateTaskRequestDto,
+    examples: {
+      statusOnly: {
+        summary: 'Update status only',
+        description: 'Move a task to in-progress',
+        value: {
+          status: 'in-progress',
         },
-        status: {
-          type: 'string',
-          enum: ['pending', 'in-progress', 'completed'],
-          example: 'in-progress',
-        },
-        priority: {
-          type: 'string',
-          enum: ['low', 'medium', 'high'],
-          example: 'high',
-        },
-        dueDate: {
-          type: 'string',
-          format: 'date-time',
-          example: '2026-04-05T18:00:00.000Z',
-          nullable: true,
-        },
-        assignee: { type: 'string', example: 'Jane Doe', nullable: true },
       },
-      required: ['title', 'status', 'priority'],
-      example: {
-        title: 'Finish report',
-        description: 'Summarize Q1 metrics',
-        status: 'in-progress',
-        priority: 'high',
-        dueDate: '2026-04-05T18:00:00.000Z',
-        assignee: 'Jane Doe',
+      priorityAndAssignee: {
+        summary: 'Update priority and reassign',
+        description: 'Escalate priority and reassign the task',
+        value: {
+          priority: 'high',
+          assignee: 'Jane Doe',
+        },
+      },
+      fullUpdate: {
+        summary: 'Full update',
+        description: 'Update all fields at once',
+        value: {
+          title: 'Finish quarterly report — final version',
+          description: 'Include revised Q1 charts and executive summary',
+          status: 'in-progress',
+          priority: 'high',
+          dueDate: '2026-04-05T18:00:00.000Z',
+          assignee: 'Jane Doe',
+        },
       },
     },
   })
-  @ApiParam({ name: 'id', description: 'Task UUID' })
-  @ApiResponse({ status: 200, description: 'Task updated' })
-  @ApiResponse({ status: 400, description: 'Validation error' })
-  @ApiResponse({ status: 404, description: 'Task not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Task successfully updated. Returns the full updated task.',
+    type: TaskResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Validation error — one or more fields failed schema validation.',
+    type: ValidationErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No task found with the provided ID.',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: InternalServerErrorResponseDto,
+  })
   async updateTask(
     @Param('id', new ZodValidationPipe(TaskIdSchema.shape.id))
     id: TaskIdDto['id'],
@@ -313,12 +425,38 @@ export class TasksController {
     }
   }
 
+  // ─── Delete Task ────────────────────────────────────────────────────────
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a task by ID' })
-  @ApiParam({ name: 'id', description: 'Task UUID' })
-  @ApiResponse({ status: 204, description: 'Task deleted' })
-  @ApiResponse({ status: 404, description: 'Task not found' })
+  @ApiOperation({
+    summary: 'Delete a task',
+    description:
+      'Permanently deletes a task identified by UUID. ' +
+      'Returns 204 No Content on success, 404 if the task does not exist. ' +
+      'This action is **irreversible**.',
+    operationId: 'deleteTask',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique UUID identifier of the task to delete',
+    format: 'uuid',
+    example: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Task successfully deleted. No content returned.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No task found with the provided ID.',
+    type: NotFoundErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: InternalServerErrorResponseDto,
+  })
   async deleteTask(
     @Param('id', new ZodValidationPipe(TaskIdSchema.shape.id))
     id: TaskIdDto['id'],
