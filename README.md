@@ -24,18 +24,18 @@ Built as an AI-assisted development exercise using GitHub Copilot with strict ar
 ## Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      Monorepo (pnpm)                    │
-│                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
-│  │   apps/api   │  │   apps/web   │  │packages/shared│  │
-│  │   (NestJS)   │  │  (Next.js)   │  │ (Zod schemas) │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘   │
-│         │                 │                  │          │
-│         └─────────────────┴──────────────────┘          │
-│                     shared types,                       │
-│                  enums & validation                     │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                      Monorepo (pnpm)                     │
+│                                                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────────┐   │
+│  │   apps/api   │  │   apps/web   │  │packages/shared│   │
+│  │   (NestJS)   │  │  (Next.js)   │  │ (Zod schemas) │   │
+│  └──────┬───────┘  └──────┬───────┘  └───────┬───────┘   │
+│         │                 │                  │           │
+│         └─────────────────┴──────────────────┘           │
+│                     shared types,                        │
+│                  enums & validation                      │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ### Backend Clean Architecture (apps/api)
@@ -480,17 +480,17 @@ Each task had preconditions: code must compile, lint must pass, tests must pass 
 
 ## Trade-offs
 
-| Decision                       | Trade-off                          | Rationale                                                                                                                                                                                                       |
-| ------------------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **PUT with partial schema**    | Not strict PUT semantics           | Meets spec requirement for PUT while allowing partial updates via `CreateTaskSchema.partial()` — practical for task editing                                                                                     |
-| **Pagination without infinite scroll** | Extra UI for page controls  | Server-side pagination with page/pageSize is implemented; infinite scroll would improve UX but adds frontend complexity                                                                                         |
-| **Prisma as ORM**              | Query builder abstraction overhead | Prisma's type-safe queries and auto-generated client outweigh raw SQL flexibility for this use case                                                                                                             |
-| **String enums in DB**         | Not using PostgreSQL native enums  | Prisma string fields with Zod validation at the application boundary; avoids migration pain when adding enum values                                                                                             |
-| **No authentication**          | No user isolation                  | Out of scope for this exercise; the `assignee` field is free text                                                                                                                                               |
-| **standardSchemaResolver**     | Newer, less documented             | Forward-compatible with Zod v4 Standard Schema spec; required discovering the correct import path during development                                                                                            |
-| **Server Components not used** | All components are client-side     | Task management requires heavy interactivity (forms, filters, dialogs) — Server Components would add complexity without meaningful benefit here                                                                 |
-| **61 tests, no E2E**           | No browser-based integration tests | Unit + integration tests cover business logic and component behavior; E2E (Playwright/Cypress) would be the next step for a production app                                                                      |
-| **tsx for dev mode**           | Not using Nest CLI compiler        | `nest start --watch` fails with `module: "nodenext"` + monorepo path aliases; tsx runs TypeScript directly via esbuild, requiring explicit `@Inject()` decorators since esbuild doesn't emit decorator metadata |
+| Decision                               | Trade-off                          | Rationale                                                                                                                                                                                                       |
+| -------------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PUT with partial schema**            | Not strict PUT semantics           | Meets spec requirement for PUT while allowing partial updates via `CreateTaskSchema.partial()` — practical for task editing                                                                                     |
+| **Pagination without infinite scroll** | Extra UI for page controls         | Server-side pagination with page/pageSize is implemented; infinite scroll would improve UX but adds frontend complexity                                                                                         |
+| **Prisma as ORM**                      | Query builder abstraction overhead | Prisma's type-safe queries and auto-generated client outweigh raw SQL flexibility for this use case                                                                                                             |
+| **String enums in DB**                 | Not using PostgreSQL native enums  | Prisma string fields with Zod validation at the application boundary; avoids migration pain when adding enum values                                                                                             |
+| **No authentication**                  | No user isolation                  | Out of scope for this exercise; the `assignee` field is free text                                                                                                                                               |
+| **standardSchemaResolver**             | Newer, less documented             | Forward-compatible with Zod v4 Standard Schema spec; required discovering the correct import path during development                                                                                            |
+| **Server Components not used**         | All components are client-side     | Task management requires heavy interactivity (forms, filters, dialogs) — Server Components would add complexity without meaningful benefit here                                                                 |
+| **61 tests, no E2E**                   | No browser-based integration tests | Unit + integration tests cover business logic and component behavior; E2E (Playwright/Cypress) would be the next step for a production app                                                                      |
+| **tsx for dev mode**                   | Not using Nest CLI compiler        | `nest start --watch` fails with `module: "nodenext"` + monorepo path aliases; tsx runs TypeScript directly via esbuild, requiring explicit `@Inject()` decorators since esbuild doesn't emit decorator metadata |
 
 ---
 
@@ -523,9 +523,3 @@ pnpm exec prisma generate         # Regenerate Prisma Client
 docker compose -f docker/docker-compose.yaml up -d     # Start Postgres
 docker compose -f docker/docker-compose.yaml down       # Stop Postgres
 ```
-
----
-
-## License
-
-ISC
